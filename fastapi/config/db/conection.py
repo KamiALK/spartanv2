@@ -3,18 +3,21 @@
 
 from sqlalchemy import create_engine, MetaData
 
+"""
+base de datos : JUGADORES
+TABLA: usuarios
 
-try:
+"""
+from sqlalchemy import create_engine, MetaData
 
-    engine = create_engine("mysql+pymysql://root:123456@localhost:3306/JUGADORES")
-    Meta_Data = MetaData()
+engine = create_engine("mysql+pymysql://root:123456@localhost:3306/JUGADORES")
+Meta_Data = MetaData()
     
     
-    conn =engine.connect()
-    print("conexion exitosa")
+conn =engine.connect()
+print("conexion exitosa")
     
-except Exception as ex:
-    print(ex)
+
 
 
 

@@ -1,13 +1,17 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 from schema.user_schema import UserSchema
+from config.db.conection import conn, engine
+from model.users import users
+
 
 user = APIRouter()
 
+
+
 @user.get("/")
-def root():
+async def root():
     return {"messaje":"soy router y estoy siendo importado al main"}
 
-@user.post("/api/user")
-#data_user es la data del usuario que viene del backend
-def create_user(data_user):
-    return{}
+
+    

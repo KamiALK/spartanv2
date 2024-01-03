@@ -1,17 +1,17 @@
-from sqlalchemy import Table, column
+from sqlalchemy import Table, Column
 from sqlalchemy.sql.sqltypes import Integer, String
-from config.db import engine, Meta_Data
+from config.db.conection import engine, Meta_Data, MetaData
 
 
-users = table("users", Meta_Data, 
-              column("id", Integer, primary_key = True),
-              column("username",String(255),nullable = False),
-              column("name", String(255), nullable = False),
-              column("apellido",String(255),nullable = False),
-              column("celular", Integer(255),nullable = False),
-              column("edad", Integer(255),nullable = False),
-              column("password", String(255),nullable = False),
-              column("password", String(255),nullable = False),
-              column("email", String(255), nullable = False))
+users = Table("usuarios", Meta_Data, 
+              Column("id", Integer, nullable = False),
+              Column("username", String(255), nullable = False),
+              Column("nombre", String(255), nullable = False),
+              Column("apellido",String (255),nullable = False),
+              Column("celular", Integer,nullable = False),
+              Column("edad", Integer, nullable = False),
+              Column("cedula", Integer,primary_key = True ),
+              Column("passwd", String(255),nullable = False),
+              Column("email", String(255), nullable = False))
 
 Meta_Data.create_all(engine)

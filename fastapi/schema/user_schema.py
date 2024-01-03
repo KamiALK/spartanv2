@@ -3,11 +3,35 @@ from pydantic import BaseModel
 from typing import Optional
 
 
+
+    
 class UserSchema (BaseModel):
-    id: Optional[str]
-    name: str
+    id : Optional[str] =None
     username: str
-    userpass: str
+    passwd: str
+    
+
+
+
+class User(BaseModel):
+    id: Optional[int] = None
+    username: str
+    nombre: str
+    apellido: str
+    celular: int
+    edad: int
+    cedula: int
+    passwd: str
+    email: str
+
+    
+    
+
+
+
+
+    
+    
         
     
     

@@ -23,6 +23,17 @@ class User(BaseModel):
     cedula: int
     passwd: str
     email: str
+    
+class Usernoid(BaseModel):
+
+    username: str
+    nombre: str
+    apellido: str
+    celular: int
+    edad: int
+    cedula: int
+    passwd: str
+    email: str
 
     
     

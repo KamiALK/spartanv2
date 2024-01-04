@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from schema.user_schema import UserSchema
-from config.db.conection import conn, engine
+from db.conection import conn, engine
 from model.users import users
 
 

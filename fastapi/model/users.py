@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column
 from sqlalchemy.sql.sqltypes import Integer, String
-from config.db.conection import engine, Meta_Data, MetaData
+from db.conection import engine, Meta_Data, MetaData
 
 
 users = Table("usuarios", Meta_Data, 
@@ -13,5 +13,6 @@ users = Table("usuarios", Meta_Data,
               Column("cedula", Integer,primary_key = True ),
               Column("passwd", String(255),nullable = False),
               Column("email", String(255), nullable = False))
+
 
 Meta_Data.create_all(engine)

@@ -1,5 +1,5 @@
-from fastapi import APIRouter
-from db.conection import conn
+from fastapi import APIRouter,HTTPException,status
+from db.conection import engine
 from model.users import users 
 from schema.user_schema import User,Userschemanoid
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,15 +17,17 @@ async def root():
 
 
 #esta creacion de usuario con has "pbkdf2:sha256:30"
-@userprueba.post("/usuarios/pass/")
+@userprueba.post("/usuarios/pass/",status_code= status.HTTP_201_CREATED)
 async def create_user(user: Userschemanoid):
-    userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
-    print(userdict)
-    userdict["passwd"] = generate_password_hash(user.passwd, "pbkdf2:sha256:30", 30)
-    print(userdict)
-    conn.execute(users.insert().values(**userdict))
-    conn.commit()
-    return {"message": "User created successfully."}
+    with engine.connect() as conn:
+        userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
+        print(userdict)
+        userdict["passwd"] = generate_password_hash(user.passwd, "pbkdf2:sha256:30", 30)
+        print(userdict)
+        conn.execute(users.insert().values(**userdict))
+        conn.commit()
+    return HTTPException(status_code=status.HTTP_201_CREATED,
+                         detail="usuario creado exitosamente")
 
 
 #esta es fake CREACION SIN ID EL JSON

@@ -1,11 +1,11 @@
 #tenemos que diseñar el esquema para el usuario que entra del backend
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional 
 
 
 
     
-class UserSchema (BaseModel):
+class UserSchemalog (BaseModel):
     id : Optional[str] =None
     username: str
     passwd: str
@@ -24,7 +24,7 @@ class User(BaseModel):
     passwd: str
     email: str
     
-class Usernoid(BaseModel):
+class Userschemanoid(BaseModel):
 
     username: str
     nombre: str

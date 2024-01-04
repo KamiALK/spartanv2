@@ -5,7 +5,7 @@ from router.routerPRUEBA import userprueba
 app =FastAPI()
 
 '''
- 
+uvicorn main:app --reload 
 
 '''
 # app.include_router(user)

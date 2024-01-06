@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column
+from sqlalchemy import Table, Column, Select
 from sqlalchemy.sql.sqltypes import Integer, String
 from db.conection import engine, Meta_Data, MetaData
 
@@ -13,6 +13,9 @@ users = Table("usuarios", Meta_Data,
               Column("cedula", Integer,primary_key = True ),
               Column("passwd", String(255),nullable = False),
               Column("email", String(255), nullable = False))
+
+usersdos = Table("usuarios", Meta_Data, autoload_with=engine)
+query = Select(users)
 
 
 Meta_Data.create_all(engine)

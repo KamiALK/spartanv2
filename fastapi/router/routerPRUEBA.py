@@ -17,10 +17,6 @@ userprueba = APIRouter()
 
 
 
-
-
-
-@userprueba.get("/usuarios")
 #lista de todos los usuarios
 async def get_users_lista():
     with engine.connect() as conn:
@@ -32,7 +28,6 @@ async def get_users_lista():
 
         return user_list
     
-@userprueba.get("/user/{user_id}",)#modelo sin contraseña 
 #ficha de user
 async def get_individual_user(user_id =int):
     with engine.connect() as conn:
@@ -44,6 +39,12 @@ async def get_individual_user(user_id =int):
         # Convertir el resultado de un elemento de una lista a diccionario
         user_list = dict(zip(columns, result))
         return user_list
+
+@userprueba.get("/usuarios")
+#lista de todos los usuario a =async  gdef get_users_lista()
+    
+@userprueba.get("/user/{user_id}",)#modelo sin contraseña 
+#ficha de user
 
 
 #! /////////////////////////////////      POST       ///////////////////////////////    

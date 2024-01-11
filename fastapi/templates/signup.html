@@ -7,14 +7,9 @@
   </div>
 
   <form method="post" action="/data-processing" class="row g-3 mx-sm-5 mx-2">
-    <div class="col-md-4">
-      <label for="validationDefault01" class="form-label">First name</label>
-      <input name="firstname" type="text" class="form-control" id="validationDefault01" required />
-    </div>
-    <div class="col-md-4">
-      <label for="validationDefault02" class="form-label">Last name</label>
-      <input name="lastname" type="text" class="form-control" id="validationDefault02" required />
-    </div>
+    
+    
+    <!-- tenemos la entrada del username  -->
     <div class="col-md-4">
       <label for="validationDefaultUsername" class="form-label">Username</label>
       <div class="input-group">
@@ -27,31 +22,71 @@
           aria-describedby="inputGroupPrepend2"
           required
         />
+    
       </div>
     </div>
+
+<!-- tenemos la entrada del nombre   name="firstname"   -->
+    <div class="col-md-4">
+      <label for="validationDefault01" class="form-label"> nombres </label>
+      <input name="nombres" type="text" class="form-control" id="validationDefault01" required />
+    </div>
+    
+<!-- tenemos la entrada del apellido -->
+    <div class="col-md-4">
+      <label for="validationDefault02" class="form-label">apellidos</label>
+      <input name="apellidos" type="text" class="form-control" id="validationDefault02" required />
+    </div>
+    
+<!-- tenemos la entrada del celular -->
+    <div class="col-md-4">
+      <label for="validationDefault02" class="form-label">celular</label>
+      <input name="celular" type="number" class="form-control" id="validationDefault02" required />
+    </div>
+    <!-- tenemos la entrada del edad -->
+        <div class="col-md-4">
+          <label for="validationDefault02" class="form-label">edad</label>
+          <input name="edad" type="number" class="form-control" id="validationDefault02" required />
+        </div>
+        <!-- tenemos la entrada del  cedula-->
+        <div class="col-md-4">
+          <label for="validationDefault02" class="form-label">cedula</label>
+          <input name="cedula" type="number" class="form-control" id="validationDefault02" required />
+        </div>
+<!-- aqui tenemos el campo de contraseña -->
+            <div class="col-md-3">
+              <label for="validationDefault05" class="form-label">Password</label>
+              <input
+                name="passwd"
+                type="password"
+                class="form-control"
+                id="validationDefault05"
+                required
+              />
+            </div>
+<!-- tenemos la entrada del email -->
+        <div class="col-md-4">
+      <label for="validationDefault02" class="form-label">email</label>
+      <input name="email" type="text" class="form-control" id="validationDefault02" required />
+    </div>
+    
+<!-- tenemos el campo de pais country
     <div class="col-md-3">
       <label for="validationDefault04" class="form-label">Country</label>
       <select name="country" class="form-select" id="validationDefault04" required>
         <option selected disabled value="">Choose...</option>
-        <option value="ar">Argentina</option>
-        <option value="can">Canada</option>
-        <option value="co">Colombia</option>
+        <option value="argentina">Argentina</option>
+        <option value="canada">Canada</option>
+        <option value="colombia">Colombia</option>
         <option value="usa">UU.EE</option>
-        <option value="ve">Venezuela</option>
+        <option value="venezuela">Venezuela</option>
       </select>
-    </div>
-    <div class="col-md-3">
-      <label for="validationDefault05" class="form-label">Password</label>
-      <input
-        name="password_user"
-        type="password"
-        class="form-control"
-        id="validationDefault05"
-        required
-      />
-    </div>
+    </div> -->
+
+
+<!-- aqui tenemos al boton submit      -->
     <div class="col-12">
-      <button class="btn btn-primary" type="submit">Send Data</button>
+      <button class="btn btn-primary" type="submit" >aceptar</button>
     </div>
   </form>
 {% endblock %}

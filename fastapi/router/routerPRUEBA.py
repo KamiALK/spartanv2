@@ -17,6 +17,10 @@ userprueba = APIRouter()
 
 
 
+
+
+
+@userprueba.get("/usuarios")
 #lista de todos los usuarios
 async def get_users_lista():
     with engine.connect() as conn:
@@ -27,7 +31,10 @@ async def get_users_lista():
         user_list = [dict(zip(columns, row)) for row in result]
 
         return user_list
-    
+
+
+
+@userprueba.get("/user/{user_id}",)#modelo sin contraseña    
 #ficha de user
 async def get_individual_user(user_id =int):
     with engine.connect() as conn:
@@ -40,11 +47,9 @@ async def get_individual_user(user_id =int):
         user_list = dict(zip(columns, result))
         return user_list
 
-@userprueba.get("/usuarios")
-#lista de todos los usuario a =async  gdef get_users_lista()
+
     
-@userprueba.get("/user/{user_id}",)#modelo sin contraseña 
-#ficha de user
+
 
 
 #! /////////////////////////////////      POST       ///////////////////////////////    
@@ -53,7 +58,7 @@ async def get_individual_user(user_id =int):
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @userprueba.post("/usuarios/jwt/",status_code= status.HTTP_201_CREATED)
-async def create_user(user: Userschemanoid):
+async def create_user_uno(user: Userschemanoid):
     with engine.connect() as conn:
         userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
         userdict["passwd"] = pwd_context.hash(user.passwd)
@@ -69,7 +74,7 @@ async def create_user(user: Userschemanoid):
 
 #esta creacion de usuario con has "pbkdf2:sha256:30"
 @userprueba.post("/usuarios/pass/",status_code= status.HTTP_201_CREATED)
-async def create_user(user: Userschemanoid):
+async def create_user_dos(user: Userschemanoid):
     with engine.connect() as conn:
         userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
         userdict["passwd"] = generate_password_hash(user.passwd, "pbkdf2:sha256:30", 30)
@@ -84,12 +89,11 @@ async def create_user(user: Userschemanoid):
 
 
 
-
 #! ///////////////////////////////////////         PUT         //////////////////////////////////////////
 # version nueva con jwt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 @userprueba.put("/usuarios/{id}",)
-async def update_user( user_update: Userschemanoid, id=int):
+async def update_user_uno( user_update: Userschemanoid, id=int):
     with engine.connect() as conn:
         #encripto la pass
         passwd_encrip =pwd_context.hash(user_update.passwd)
@@ -109,7 +113,7 @@ async def update_user( user_update: Userschemanoid, id=int):
 
 #version antigua
 @userprueba.put("/user/{id}",)
-async def update_user( user_update: Userschemanoid, id=int):
+async def update_user_dos( user_update: Userschemanoid, id=int):
     with engine.connect() as conn:
         #encripto la pass
         passwd_encrip =generate_password_hash(user_update.passwd,"pbkdf2:sha256:30",30)

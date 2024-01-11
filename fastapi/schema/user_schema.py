@@ -5,8 +5,8 @@ from typing import Optional
 
 
     
-class UserSchemalog (BaseModel):
-    id : Optional[str] =None
+class UserSchemalogin (BaseModel):
+    # id : Optional[str] =None
     username: str
     passwd: str
     

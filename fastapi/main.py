@@ -24,23 +24,23 @@ app.include_router(userprueba)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request:Request):
-    return Jinja2_Templates.TemplateResponse("login.html", {"request":request})
+    return Jinja2_Templates.TemplateResponse("index.html", {"request":request})
                                          
 
 @app.get("/user/dash/", response_class=HTMLResponse)
 async def dashh(request:Request):
-    return Jinja2_Templates.TemplateResponse("dash.html", {"request":request})
+    return Jinja2_Templates.TemplateResponse("index.html", {"request":request})
 
 @app.post("/login")
 async def login(username:Annotated[str,Form()], password:Annotated[str,Form()],request:Request):
-    return  Jinja2_Templates.TemplateResponse("dash.html", {"request":request})
+    return  Jinja2_Templates.TemplateResponse("login.html", {"request":request})
 
-#return {
-#         "username": "username",
-#        "password" :"password" 
+@app.get("/singup")
+async def singup(req: Request):
+    return  Jinja2_Templates.TemplateResponse("singup.html", {"request": req})
 
-             
-#     }
-
-
+@app.get("/user")
+async def user (req:Request):
+    return  Jinja2_Templates.TemplateResponse("user.html", {"request": req})
+    
 

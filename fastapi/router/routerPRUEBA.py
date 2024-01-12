@@ -149,49 +149,36 @@ async def delete_user(id=int):
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def get_individual_user(usernameBACK: str):
+def get_individual_user(usernameBACK: str ):
+    #funcion 1
     with engine.connect() as conn:
         result = conn.execute(users.select().where(users.c.id==usernameBACK)).first()
         if result is None:
             busqueda = "no esta"
             return busqueda
         
-        # columns = users.columns.keys()
+        columns = users.columns.keys()
         # Convertir el resultado de un elemento de una lista a diccionario
-        # user_list = dict(zip(columns, result))
-        return result
+        user_db = dict(zip(columns, result))
+        return user_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def validar_usuario(user: Userschemanoid):
+def validar_usuario(getuser,username:str, password:str):
+    #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
     with engine.connect() as conn:
-        
-        
-        
-        userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
-        userdict["passwd"] = pwd_context.hash(user.passwd)
-        print(userdict)
-        conn.execute(users.insert().values(**userdict))
-        conn.commit()
-    return HTTPException(status_code=status.HTTP_201_CREATED,
-                         detail="usuario creado exitosamente")
+        userdb=get_individual_user(getuser)
+        hash_pass= pwd_context.hash(password)
+    if userdb["username"]==username:
+        if  userdb["passwd"]== hash_pass:
+            return userdb
+        else: {"messaje":"password incorrect"}
+    else:{"mesaje":"login o password incorrect"}
+    
+
+ 
     
     
-@userprueba.post("/token")
-async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-) -> Token:
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
 
 

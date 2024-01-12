@@ -1,12 +1,20 @@
-from fastapi import APIRouter,HTTPException,status,Response
+from fastapi import APIRouter,HTTPException,status,Response, Depends
 from sqlalchemy import RowMapping,Row
 from db.conection import engine
 from model.users import users
 from schema.user_schema import User,Userschemanoid,Usernopass
 from werkzeug.security import generate_password_hash, check_password_hash
-# from typing import List
-from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
+
+from jose import JWTError, jwt
+from datetime import datetime, timedelta, timezone
+
+
+
+
+
 
 
 userprueba = APIRouter()
@@ -138,8 +146,51 @@ async def delete_user(id=int):
 
 #! //////////////////////////////////////////// login  ////////////////////////////////////////////////////////
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def get_individual_user(usernameBACK: str):
+    with engine.connect() as conn:
+        result = conn.execute(users.select().where(users.c.id==usernameBACK)).first()
+        if result is None:
+            busqueda = "no esta"
+            return busqueda
+        
+        columns = users.columns.keys()
+        # Convertir el resultado de un elemento de una lista a diccionario
+        user_list = dict(zip(columns, result))
+        return user_list
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-
+def validar_usuario(user: Userschemanoid):
+    with engine.connect() as conn:
+        
+        
+        
+        userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
+        userdict["passwd"] = pwd_context.hash(user.passwd)
+        print(userdict)
+        conn.execute(users.insert().values(**userdict))
+        conn.commit()
+    return HTTPException(status_code=status.HTTP_201_CREATED,
+                         detail="usuario creado exitosamente")
+    
+    
+@userprueba.post("/token")
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> Token:
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
 
 

@@ -7,28 +7,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
-
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 SECRET_KEY ="a2e2da9015817e03d78da769dca6b13bad1196ca632f2584a9fb13473ac0d35a"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2 = OAuth2PasswordBearer(tokenUrl="login")
 
 
 userprueba = APIRouter()
 
 
 
-#? /////////////////////////////             GET            /////////////////////////////#
-
-
-
-
-
-
+#? /////////////////////////////             GET            /////////////////////////////
 @userprueba.get("/usuarios")
 #lista de todos los usuarios
 async def get_users_lista():
@@ -40,9 +32,6 @@ async def get_users_lista():
         user_list = [dict(zip(columns, row)) for row in result]
 
         return user_list
-
-
-
 @userprueba.get("/user/{user_id}",)#modelo sin contraseña    
 #ficha de user
 async def get_individual_user(user_id =int):
@@ -55,17 +44,8 @@ async def get_individual_user(user_id =int):
         # Convertir el resultado de un elemento de una lista a diccionario
         user_list = dict(zip(columns, result))
         return user_list
-
-
-    
-
-
-
-#! /////////////////////////////////      POST       ///////////////////////////////    
-
-
+#! /////////////////////////////////         POST           ///////////////////////////////    
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 @userprueba.post("/usuarios/jwt/",status_code= status.HTTP_201_CREATED)
 async def create_user_uno(user: Userschemanoid):
     with engine.connect() as conn:
@@ -76,29 +56,7 @@ async def create_user_uno(user: Userschemanoid):
         conn.commit()
     return HTTPException(status_code=status.HTTP_201_CREATED,
                          detail="usuario creado exitosamente")
-
-
-
-
-
-#esta creacion de usuario con has "pbkdf2:sha256:30"
-@userprueba.post("/usuarios/pass/",status_code= status.HTTP_201_CREATED)
-async def create_user_dos(user: Userschemanoid):
-    with engine.connect() as conn:
-        userdict = user.model_dump()#dict()  tomo el usuario y lo convierto en diccionario
-        userdict["passwd"] = generate_password_hash(user.passwd, "pbkdf2:sha256:30", 30)
-        print(userdict)
-        conn.execute(users.insert().values(**userdict))
-        conn.commit()
-    return HTTPException(status_code=status.HTTP_201_CREATED,
-                         detail="usuario creado exitosamente")
-
-
-
-
-
-
-#! ///////////////////////////////////////         PUT         //////////////////////////////////////////
+#? /////////////////////////////             PUT             ///////////////////////////////
 # version nueva con jwt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 @userprueba.put("/usuarios/{id}",)
@@ -116,27 +74,7 @@ async def update_user_uno( user_update: Userschemanoid, id=int):
         conn.execute(users.update().values(**values).where((users.c.id==id)))
         conn.commit()
     return values
-
-
-
-
-#version antigua
-@userprueba.put("/user/{id}",)
-async def update_user_dos( user_update: Userschemanoid, id=int):
-    with engine.connect() as conn:
-        #encripto la pass
-        passwd_encrip =generate_password_hash(user_update.passwd,"pbkdf2:sha256:30",30)
-        #traigo el registro que quiero modificar 
-        conn.execute(users.select().where(users.c.id==id)).first()
-        #en el campo de comtraseña coloco el valor encriptado
-        user_update.passwd =passwd_encrip
-        #convierto todo en diccionario
-        values = user_update.model_dump()
-        #mando los datos a la base de datos 
-        conn.execute(users.update().values(**values).where((users.c.id==id)))
-        conn.commit()
-    return values # me muestra los datos 
-#! ///////////////////////////////////////        DELETE         //////////////////////////////////////////
+#! ////////////////////////////              DELETE           ////////////////////////////////
 @userprueba.delete("/user/{id}",)
 async def delete_user(id=int):
     with engine.connect() as conn:
@@ -144,41 +82,78 @@ async def delete_user(id=int):
         conn.execute(users.delete().where((users.c.id==id)))
         conn.commit()
     return {"mensaje":"usuario borrado"}
-
-#! //////////////////////////////////////////// login  ////////////////////////////////////////////////////////
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
+#* ////////////////////////////              LOGIN          /////////////////////////////////
 def get_individual_user(usernameBACK: str ):
     #funcion 1
     with engine.connect() as conn:
-        result = conn.execute(users.select().where(users.c.id==usernameBACK)).first()
+        result = conn.execute(users.select().where(users.c.username==usernameBACK)).first()
         if result is None:
             busqueda = "no esta"
-            return busqueda
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="usuario no encontrado")
+        else: result
         
         columns = users.columns.keys()
         # Convertir el resultado de un elemento de una lista a diccionario
         user_db = dict(zip(columns, result))
         return user_db
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def validar_usuario(getuser,username:str, password:str):
+def validar_usuario(username:str, password:str):
     #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
     with engine.connect() as conn:
-        userdb=get_individual_user(getuser)
-        hash_pass= pwd_context.hash(password)
+        userdb=get_individual_user(username)
+        
+        hash_pass= userdb["passwd"]
     if userdb["username"]==username:
+        print(userdb["username"])
         if  userdb["passwd"]== hash_pass:
+            print(userdb["passwd"])
             return userdb
         else: {"messaje":"password incorrect"}
     else:{"mesaje":"login o password incorrect"}
-    
 
- 
-    
-    
+
+
+@userprueba.post("/login")
+async def login(form:OAuth2PasswordRequestForm= Depends()):
+    #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
+    with engine.connect() as conn:
+        userdb=get_individual_user(form.username)
+        
+        hash_pass= pwd_context.hash(form.password)
+    if userdb["username"]==form.username:
+        print(userdb["username"])
+        print(hash_pass)
+        if  userdb["passwd"]== hash_pass:
+            print(userdb["passwd"])
+            return userdb
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")
+  
+    else: HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="usuario incorrecto ")
+
+
+
+
+
+
+
+
+        
+   # @userprueba.post("/login")
+# async def login(form:OAuth2PasswordRequestForm= Depends()):
+#     userdb= validar_usuario(form.username,form.password)
+#     print(userdb)
+#     if not userdb:    
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="credenciales incorrectas")
+#     user =get_individual_user(form.username)
+#     return{"access_token":user.username,"token_type":"bearer"} 
+
+# async def current_user(token: str=Depends(oauth2)):
+#     user = get_individual_user(token)
+#     if not user:
+        # return user
+
+# @userprueba.get("/user/me")
+# async def me(user:User=Depends(current_user)):
+#     return user 
+        
 
 

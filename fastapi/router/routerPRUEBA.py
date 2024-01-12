@@ -10,8 +10,9 @@ from passlib.context import CryptContext
 
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
-
-
+SECRET_KEY ="a2e2da9015817e03d78da769dca6b13bad1196ca632f2584a9fb13473ac0d35a"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 
@@ -155,10 +156,10 @@ def get_individual_user(usernameBACK: str):
             busqueda = "no esta"
             return busqueda
         
-        columns = users.columns.keys()
+        # columns = users.columns.keys()
         # Convertir el resultado de un elemento de una lista a diccionario
-        user_list = dict(zip(columns, result))
-        return user_list
+        # user_list = dict(zip(columns, result))
+        return result
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

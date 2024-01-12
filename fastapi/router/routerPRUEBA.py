@@ -111,18 +111,19 @@ def validar_usuario(username:str, password:str):
     else:{"mesaje":"login o password incorrect"}
 
 
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
 @userprueba.post("/login")
 async def login(form:OAuth2PasswordRequestForm= Depends()):
     #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
     with engine.connect() as conn:
         userdb=get_individual_user(form.username)
-        
-        hash_pass= pwd_context.hash(form.password)
+        sin_hash =verify_password(form.password, userdb["passwd"])
     if userdb["username"]==form.username:
         print(userdb["username"])
-        print(hash_pass)
-        if  userdb["passwd"]== hash_pass:
+        print(sin_hash)
+        if  userdb["passwd"]== sin_hash:
             print(userdb["passwd"])
             return userdb
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")

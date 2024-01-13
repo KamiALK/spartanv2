@@ -120,13 +120,12 @@ async def login(form:OAuth2PasswordRequestForm= Depends()):
     with engine.connect() as conn:
         userdb=get_individual_user(form.username)
         sin_hash =verify_password(form.password, userdb["passwd"])
+      
     if userdb["username"]==form.username:
         print(userdb["username"])
         print(sin_hash)
-        if  userdb["passwd"]== sin_hash:
-            print(userdb["passwd"])
-            return userdb
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")
+        if  not sin_hash :
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")
   
     else: HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="usuario incorrecto ")
 

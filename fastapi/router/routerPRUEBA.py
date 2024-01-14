@@ -2,7 +2,7 @@ from fastapi import APIRouter,HTTPException,status,Response, Depends
 from sqlalchemy import RowMapping,Row
 from db.conection import engine
 from model.users import users
-from schema.user_schema import User,Userschemanoid,Usernopass
+from schema.user_schema import User,Userschemanoid,Usernopass,Token,TokenData
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -89,7 +89,10 @@ def get_individual_user(usernameBACK: str ):
         result = conn.execute(users.select().where(users.c.username==usernameBACK)).first()
         if result is None:
             busqueda = "no esta"
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="usuario no encontrado")
+            raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username",
+            headers={"WWW-Authenticate": "Bearer"},)
         else: result
         
         columns = users.columns.keys()
@@ -104,7 +107,7 @@ def validar_usuario(username:str, password:str):
         hash_pass= userdb["passwd"]
     if userdb["username"]==username:
         print(userdb["username"])
-        if  userdb["passwd"]== hash_pass:
+        if  userdb["passwd"]== password:
             print(userdb["passwd"])
             return userdb
         else: {"messaje":"password incorrect"}
@@ -114,46 +117,64 @@ def validar_usuario(username:str, password:str):
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+
+
+
 @userprueba.post("/login")
-async def login(form:OAuth2PasswordRequestForm= Depends()):
+async def login(form:OAuth2PasswordRequestForm= Depends()) -> Token:
     #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
     with engine.connect() as conn:
         userdb=get_individual_user(form.username)
         sin_hash =verify_password(form.password, userdb["passwd"])
-      
-    if userdb["username"]==form.username:
-        print(userdb["username"])
-        print(sin_hash)
         if  not sin_hash :
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")
-  
-    else: HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="usuario incorrecto ")
+        # if userdb["username"] == form.username:#no hace nada
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+        data={"sub": userdb["username"]}, expires_delta=access_token_expires)
+
+        return Token(access_token=access_token, token_type="bearer")    
+    
+async def get_current_user(token: Annotated[str, Depends(oauth2)]):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_individual_user(token_data.username)
+    if user is None:
+        raise credentials_exception
+   
+    return user
 
 
 
+async def get_current_active_user(current_user: Annotated[Usernopass, Depends(get_current_user)]):
+    # if current_user.disabled:
+    #     raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
 
-
-
-
-
-        
-   # @userprueba.post("/login")
-# async def login(form:OAuth2PasswordRequestForm= Depends()):
-#     userdb= validar_usuario(form.username,form.password)
-#     print(userdb)
-#     if not userdb:    
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="credenciales incorrectas")
-#     user =get_individual_user(form.username)
-#     return{"access_token":user.username,"token_type":"bearer"} 
-
-# async def current_user(token: str=Depends(oauth2)):
-#     user = get_individual_user(token)
-#     if not user:
-        # return user
-
-# @userprueba.get("/user/me")
-# async def me(user:User=Depends(current_user)):
-#     return user 
-        
-
-
+@userprueba.get("/camilo/", response_model=Usernopass)
+async def read_users_me(current_user: Annotated[Usernopass, Depends(get_current_active_user)]
+):
+    return current_user

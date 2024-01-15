@@ -43,7 +43,7 @@ async def user (req:Request):
 
 
 #paso uno el login 
-@app.post("/loginnnn")
+@app.post("/loginfront")
 async def login(username:Annotated[str,Form()], password:Annotated[str,Form()],request:Request):
     return  Jinja2_Templates.TemplateResponse("login.html", {"request":request})
 
@@ -64,8 +64,8 @@ async def data_processing(username:str = Form(),nombres:str =Form(), apellidos:s
   "celular":celular,
   "edad": edad,
   "cedula":cedula,
-  "passwd": passwd,
-  "email": email
+  "email": email,
+  "passwd": passwd
   
 }
     # db =Userschemanoid(data_user)

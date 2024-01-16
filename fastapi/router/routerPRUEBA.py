@@ -1,9 +1,9 @@
 from fastapi import APIRouter,HTTPException,status,Response, Depends
-from sqlalchemy import RowMapping,Row
+
 from db.conection import engine
 from model.users import users
 from schema.user_schema import User,Userschemanoid,Usernopass,Token,TokenData
-from werkzeug.security import generate_password_hash, check_password_hash
+
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
@@ -21,8 +21,7 @@ userprueba = APIRouter()
 
 
 #? /////////////////////////////             GET            /////////////////////////////
-@userprueba.get("/usuarios")
-#lista de todos los usuarios
+@userprueba.get("/usuarios")#lista de todos los usuarios
 async def get_users_lista():
     with engine.connect() as conn:
         result = conn.execute(users.select()).fetchall()
@@ -112,12 +111,8 @@ def validar_usuario(username:str, password:str):
             return userdb
         else: {"messaje":"password incorrect"}
     else:{"mesaje":"login o password incorrect"}
-
-
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
-
-
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
@@ -127,26 +122,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-
-
-
-
-@userprueba.post("/login")
-async def login(form:OAuth2PasswordRequestForm= Depends()) -> Token:
-    #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
-    with engine.connect() as conn:
-        userdb=get_individual_user(form.username)
-        sin_hash =verify_password(form.password, userdb["passwd"])
-        if  not sin_hash :
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")
-        # if userdb["username"] == form.username:#no hace nada
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-        data={"sub": userdb["username"]}, expires_delta=access_token_expires)
-
-        return Token(access_token=access_token, token_type="bearer")    
-    
 async def get_current_user(token: Annotated[str, Depends(oauth2)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -166,15 +141,26 @@ async def get_current_user(token: Annotated[str, Depends(oauth2)]):
         raise credentials_exception
    
     return user
-
-
-
 async def get_current_active_user(current_user: Annotated[Usernopass, Depends(get_current_user)]):
     # if current_user.disabled:
     #     raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-@userprueba.get("/me", response_model=Usernopass)
-async def read_users_me(current_user: Annotated[Usernopass, Depends(get_current_active_user)]
-):
+@userprueba.post("/login")
+async def login(form:OAuth2PasswordRequestForm= Depends()) -> Token:
+    #getuser lo obtengo de la funcion para traer mi funcion de base de datos 
+    with engine.connect() as conn:
+        userdb=get_individual_user(form.username)
+        sin_hash =verify_password(form.password, userdb["passwd"])
+        if  not sin_hash :
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="contraseña incorrecta")
+        # if userdb["username"] == form.username:#no hace nada
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+        data={"sub": userdb["username"]}, expires_delta=access_token_expires)
+
+        return Token(access_token=access_token, token_type="bearer")   
+@userprueba.get("/user", response_model=Usernopass)
+async def read_users_me(current_user: Annotated[Usernopass, Depends(get_current_active_user)]):
     return current_user
+#* ////////////////////////////////////// login gregory

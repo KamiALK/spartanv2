@@ -3,7 +3,7 @@ from sqlalchemy import RowMapping,Row
 from db.conection import engine
 from model.users import users
 from schema.user_schema import User,Userschemanoid,Usernopass,Token,TokenData
-from werkzeug.security import generate_password_hash, check_password_hash
+
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext

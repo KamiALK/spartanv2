@@ -51,28 +51,3 @@ async def login(username:Annotated[str,Form()], password:Annotated[str,Form()],r
 
 
 
-import asyncio
-
-@app.post("/data-processing")
-#aqui recivo los datos del doc login .html
-async def data_processing(username:str = Form(),nombres:str =Form(), apellidos:str =Form(),celular:int = Form(), edad:int =Form(), cedula:int = Form(),passwd: str =Form(),email:str = Form()):
-    data_user ={
-  
-  "username": username,
-  "nombre": nombres,
-  "apellido": apellidos,
-  "celular":celular,
-  "edad": edad,
-  "cedula":cedula,
-  "email": email,
-  "passwd": passwd
-  
-}
-    # db =Userschemanoid(data_user)
-    db = router.routerPRUEBA.create_user_uno(data_user)
-    print(db)
-    return  {"messaje":"envio exitoso"}
-
-
-    
-

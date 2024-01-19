@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Depends,HTTPException
+from fastapi import FastAPI,Depends,HTTPException,APIRouter
 from sqlalchemy.orm import session
 import crud
 from db.conection import engine,LocalSession
@@ -10,7 +10,7 @@ from model.users import Base
 Base.metada.create_all(bing=engine)
 
 #instanciamos
-app =FastAPI()
+app =APIRouter()
 
 def get_db():
     db =LocalSession()

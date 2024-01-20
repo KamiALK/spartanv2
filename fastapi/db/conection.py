@@ -20,7 +20,7 @@
 #!----------------------------------   
 from sqlalchemy import create_engine,Table, Column, Select,CHAR,Integer, String
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker,Session
 
 
 Base =declarative_base()
@@ -29,15 +29,15 @@ Base =declarative_base()
 class User(Base):
     __tablename__ = "usuarios"
     ID = Column("ID",Integer, primary_key=True,autoincrement=True)
-    username = Column("username", String, nullable = False)
-    nombre = Column("nombre", String, nullable = False)
-    apellido = Column("apellido", String ,nullable = False)
+    username = Column("username", String(250), nullable = False)
+    nombre = Column("nombre", String(250), nullable = False)
+    apellido = Column("apellido", String(250) ,nullable = False)
     celular = Column("celular", Integer,nullable = False)
     edad = Column("edad", Integer, nullable = False)
-    cedula = Column("cedula", Integer,nullable = False)
-    genero =Column("genero", CHAR)
-    email = Column("email", String, nullable = False)
-    passwd = Column("passwd", String,nullable = False)
+    cedula = Column("cedula", Integer,unique=True,nullable = False)
+    genero =Column("genero", String(250) ,nullable = False)
+    email = Column("email", String(250), nullable = False)
+    passwd = Column("passwd", String(250),nullable = False)
 
     def __init__(self,ID,username,nombre,apellido,celular,edad,cedula,genero,email,passwd):
         self.ID =ID
@@ -51,15 +51,15 @@ class User(Base):
         self.email= email
         self.passwd =passwd
     def __repr__(self):
-        return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula},{self.genero}){self.email}{self.passwd}"
+        return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
         
 URL_CONECTION='mysql+pymysql://root:172839@localhost:3306/JUGADORES'
 engine=create_engine(URL_CONECTION,echo=True)  
 Base.metadata.create_all(bind=engine)
-LocalSession =sessionmaker(autoflush=False, autocommit=False,bing=engine)
-session= LocalSession()
+Session =sessionmaker(autoflush=False, autocommit=False,bing=engine)
 
 
+Session.close_all()
 person =User(1,"andresito","andres","almanza",3143513617,31,1024,"M","andy@ffg",123)
-session.add(person)
-session.commit()
+
+

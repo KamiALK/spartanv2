@@ -1,19 +1,17 @@
 from fastapi import FastAPI,Depends,HTTPException,APIRouter
 from sqlalchemy.orm import session
 # import crud
-from db.conection import engine,LocalSession
+from db.conection import engine,Session,User
 from schema.user_schema import Userschemanoid
 from model.users import Base
 
 
-#si no estan creadas nuestras tablas vamos a crearlas 
-# Base.MetaData.create_all(bing=engine)
 
 #instanciamos
 app =APIRouter()
 
 def get_db():
-    db =LocalSession()
+    db =Session()
     try:
         yield db
     finally:
@@ -22,4 +20,5 @@ def get_db():
 
 @app.get("/")
 async def root():
+    
     return {"messaje":"hola soy root"}

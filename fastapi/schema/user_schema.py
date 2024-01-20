@@ -13,8 +13,8 @@ class UserSchemalogin (BaseModel):
 
 
 
-class Userr(BaseModel):
-    id: Optional[int] = None
+class User(BaseModel):
+    identificador: Optional[int] = None
     username: str
     nombre: str
     apellido: str
@@ -25,7 +25,7 @@ class Userr(BaseModel):
     passwd: str
     
 class Usernopass(BaseModel):
-    id: Optional[int] = None
+    identificador: Optional[int] = None
     username: str
     nombre: str
     apellido: str

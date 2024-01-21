@@ -67,3 +67,6 @@ def get_user(id, db:Session=Depends(get_db)):
 # async def root():
 #     return {"messaje": "hola soy root de rutas"}
 #gsdfgsfdg
+#asdfasdfs
+
+#1321323

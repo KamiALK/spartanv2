@@ -21,6 +21,7 @@ class User(BaseModel):
     celular: int
     edad: int
     cedula: int
+    genero:str
     email: str
     passwd: str
     

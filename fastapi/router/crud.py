@@ -1,5 +1,4 @@
 from sqlalchemy.orm import session
-from model.users import User
 from schema.user_schema import User, Userschemanoid
 from passlib.context import CryptContext
 
@@ -30,4 +29,5 @@ def create_user(db:session,user:User):
     db.flush(new_user)
     return new_user
     
-    
+   
+    print( person.create_user())

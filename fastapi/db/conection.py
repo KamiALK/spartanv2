@@ -26,7 +26,7 @@ from sqlalchemy.orm import sessionmaker, Session
 Base = declarative_base()
 
 
-class User(Base):
+class Userdb(Base):
     __tablename__ = "usuarios"
     ID = Column("ID", Integer, primary_key=True, autoincrement=True)
     username = Column("username", String(250), nullable=False)

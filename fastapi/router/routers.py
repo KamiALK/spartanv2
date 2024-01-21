@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException, APIRouter
+from fastapi import  Depends, HTTPException, APIRouter
 from sqlalchemy.orm import session
 # import crud
-from db.conection import engine, Session, User
+from db.conection import engine, Session, Userdb
 from schema.user_schema import Userschemanoid
-from db.conection import Base, Session,User
+
 
 
 # instanciamos
@@ -20,4 +20,4 @@ def get_db():
 
 @app.get("/")
 async def root():
-    return {"messaje": "hola soy root"}
+    return {"messaje": "hola soy root de rutas"}

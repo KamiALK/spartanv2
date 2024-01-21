@@ -1,6 +1,6 @@
 from fastapi import APIRouter,HTTPException,status,Response, Depends
 
-from db.conection import engine
+# from db.conection import engine
 
 from schema.user_schema import User,Userschemanoid,Usernopass,Token,TokenData
 

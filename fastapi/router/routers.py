@@ -1,24 +1,23 @@
-from fastapi import FastAPI,Depends,HTTPException,APIRouter
+from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from sqlalchemy.orm import session
 # import crud
-from db.conection import engine,Session,User
+from db.conection import engine, Session, User
 from schema.user_schema import Userschemanoid
-from model.users import Base
+from db.conection import Base, Session,User
 
 
+# instanciamos
+app = APIRouter()
 
-#instanciamos
-app =APIRouter()
 
 def get_db():
-    db =Session()
+    db = Session()
     try:
         yield db
     finally:
         db.close()
-        
+
 
 @app.get("/")
 async def root():
-    
-    return {"messaje":"hola soy root"}
+    return {"messaje": "hola soy root"}

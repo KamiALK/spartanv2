@@ -25,7 +25,6 @@ from sqlalchemy.orm import sessionmaker,Session
 
 Base =declarative_base()
 
-
 class User(Base):
     __tablename__ = "usuarios"
     ID = Column("ID",Integer, primary_key=True,autoincrement=True)
@@ -53,13 +52,15 @@ class User(Base):
     def __repr__(self):
         return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
         
-URL_CONECTION='mysql+pymysql://root:172839@localhost:3306/JUGADORES'
-engine=create_engine(URL_CONECTION,echo=True)  
-Base.metadata.create_all(bind=engine)
+
+URL_CONECTION="mysql+pymysql://root:123456@localhost:3306/JUGADORES"
+engine=create_engine(URL_CONECTION,echo=True) 
 Session =sessionmaker(autoflush=False, autocommit=False,bing=engine)
 
+Base.metadata.create_all(bind=engine)
 
-Session.close_all()
-person =User(1,"andresito","andres","almanza",3143513617,31,1024,"M","andy@ffg",123)
+
+# Session.close_all()
+# person =User(1,"andresito","andres","almanza",3143513617,31,1024,"M","andy@ffg",123)
 
 

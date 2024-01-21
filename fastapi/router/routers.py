@@ -7,7 +7,7 @@ from schema.user_schema import Userschemanoid
 
 
 # instanciamos
-app = APIRouter()
+appi = APIRouter()
 
 
 def get_db():
@@ -18,6 +18,6 @@ def get_db():
         db.close()
 
 
-@app.get("/")
+@appi.get("/")
 async def root():
     return {"messaje": "hola soy root de rutas"}

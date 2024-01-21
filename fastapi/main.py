@@ -66,5 +66,3 @@ def get_user(id, db:Session=Depends(get_db)):
 # @router.get("/")
 # async def root():
 #     return {"messaje": "hola soy root de rutas"}
-# gsfdg
-sfdgsdfggfsd?

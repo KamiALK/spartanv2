@@ -55,9 +55,12 @@ class Userdb(Base):
         return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
 
 
+
+
+
 URL_CONECTION = "mysql+pymysql://root:123456@localhost:3306/JUGADORES"
-engine = create_engine(URL_CONECTION, echo=True)
-Session = sessionmaker(autoflush=False, autocommit=False, bing=engine)
+engine = create_engine(URL_CONECTION, )
+Session = sessionmaker(autoflush=False, autocommit=False,bind=engine)
 
 Base.metadata.create_all(bind=engine)
 

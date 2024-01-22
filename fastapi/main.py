@@ -5,7 +5,7 @@ from typing import Annotated
 # from router.routers import appi
 import router.crud 
 from db.conection import engine,Session,Userdb,Base
-from schema.user_schema import User,Userschemanoid,Usernopass, UserID
+from schema.user_schema import UserData,Userschemanoid,Usernopass, UserID
 
 
 
@@ -27,16 +27,15 @@ def get_db():
 
 
 '''
-uvicorn main:app --reload 
+uvicorn main:appi --reload 
 
 
 '''
-# appi.include_router(appi)
 
 
-person =Userdb(1,"andresito","andres","almanza",3143513617,31,1024,"M","andy@ffg",123)
-# @app.get("/")
-# async def root():
+
+
+
 def get_db():
     db = Session()
     try:
@@ -56,21 +55,15 @@ def get_users (db:Session=Depends(get_db)):
 
 @appi.get("/api/user/{id:int}",response_model=UserID)
 def get_user(id, db:Session=Depends(get_db)):
-         
-    if router.crud.get_user(db=db,id=id) is None:
+    u = router.crud.get_user_by_id(db=db,id=id)
+    if u is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no se ha encontrado el usuario")
-    return router.crud.get_user(db=db, id=id)
+    return router.crud.get_user_by_id(db=db, id=id)
 
-
-#     return 
-# @router.get("/")
-# async def root():
-#     return {"messaje": "hola soy root de rutas"}
-#gsdfgsfdg
-#asdfasdfs
-
-#1321323☺
-#asfasdfadsfaf☺
-#asdfasdfa
-#sdfasdfadsf
-#holiidsfa
+@appi.post("/api/create",response_model=UserData)
+async def create_user(user:UserData,db:Session=Depends(get_db)):
+    created_user = router.crud.create_user(db=db, user=user)
+    if created_user is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuario ya existe")
+    
+    return created_user

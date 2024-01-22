@@ -21,11 +21,12 @@
 from sqlalchemy import create_engine, Table, Column, Select, CHAR, Integer, String
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+from dotenv import load_dotenv
+import os
+
 
 
 Base = declarative_base()
-
-
 class Userdb(Base):
     __tablename__ = "usuarios"
     ID = Column("ID", Integer, primary_key=True, autoincrement=True)
@@ -56,9 +57,19 @@ class Userdb(Base):
 
 
 
+load_dotenv()
 
 
-URL_CONECTION = "mysql+pymysql://root:123456@localhost:3306/JUGADORES"
+DB_NAME =os.getenv("DB_NAME") 
+DB_HOST = os.getenv("DB_HOST")
+DB_DIALECT = os.getenv("DB_DIALECT")
+DB_PASSWORD =os.getenv("DB_PASSWORD")
+DB_USER= os.getenv("DB_USER")
+
+
+
+
+URL_CONECTION = '{}://{}:{}@{}/{}'.format(DB_DIALECT,DB_USER,DB_PASSWORD,DB_HOST,DB_NAME)
 engine = create_engine(URL_CONECTION, )
 Session = sessionmaker(autoflush=False, autocommit=False,bind=engine)
 

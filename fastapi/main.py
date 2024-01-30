@@ -6,15 +6,30 @@ from typing import Annotated
 import router.crud 
 from db.conection import engine,Session,Userdb,Base
 from schema.user_schema import UserData,Userschemanoid,Usernopass, UserID
-from fastapi.middleware import Middleware
-
-
-
-
-
+from fastapi.middleware.cors import CORSMiddleware
 
 # 
 appi =FastAPI()
+
+# Aca estamos configurando los cors
+origin = [
+
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+appi.add_middleware(
+    CORSMiddleware,
+    allow_origins=origin,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+
+
 
 
 

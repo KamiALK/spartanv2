@@ -2,7 +2,7 @@ from sqlalchemy.orm import session
 from schema.user_schema import UserData
 from passlib.context import CryptContext
 from db.conection import Userdb
-
+from router.login import APIRouter
 
 SECRET_KEY = "a2e2da9015817e03d78da769dca6b13bad1196ca632f2584a9fb13473ac0d35a"
 ALGORITHM = "HS256"
@@ -14,9 +14,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def get_users(db:session):
     return db.query(Userdb).all()
 
-
 def get_user_by_cedula(db: session, cedula: int):
     user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
+
+def get_user_by_username(db: session, username: str):
+    user = db.query(Userdb).filter(Userdb.username == username).first()
     
       
     return user

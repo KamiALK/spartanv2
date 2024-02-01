@@ -49,6 +49,9 @@ class Userschemanoid(BaseModel):
     email: str
     passwd: str
     
+
+    
+    
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -56,6 +59,18 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+class User(BaseModel):
+    username: str
+    # email: str | None = None
+    # full_name: str | None = None
+    # disabled: bool | None = None
+
+
+class UserInDB(Usernopass):
+    passwd: str
+
     
 
 

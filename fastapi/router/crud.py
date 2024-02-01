@@ -1,15 +1,26 @@
 from sqlalchemy.orm import session
-from schema.user_schema import UserData
+from schema.user_schema import UserData, TokenData,Token,Usernopass
 from passlib.context import CryptContext
 from db.conection import Userdb
-from router.login import APIRouter
+from datetime import datetime, timedelta
+from typing import Annotated
+from fastapi import APIRouter
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError 
+import jwt
+from passlib.context import CryptContext
+from pydantic import BaseModel
+from db.conection import Userdb
+from  sqlalchemy.orm import Session
+
 
 SECRET_KEY = "a2e2da9015817e03d78da769dca6b13bad1196ca632f2584a9fb13473ac0d35a"
 ALGORITHM = "HS256"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
-# person =User(1,"andresito","andres","almanza",3143513617,31,1024,"M","andy@ffg",123)
 
 def get_users(db:session):
     return db.query(Userdb).all()
@@ -19,8 +30,6 @@ def get_user_by_cedula(db: session, cedula: int):
 
 def get_user_by_username(db: session, username: str):
     user = db.query(Userdb).filter(Userdb.username == username).first()
-    
-      
     return user
     
 
@@ -45,3 +54,98 @@ def create_user(db: session, user: UserData):
     db.flush(new_user)
     
     return new_user
+
+#!   /////////////////////////////////////////////////////////////
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+# def get_user(db, username: str):
+#     if username in db:
+#         user_dict = db[username]
+#         return UserInDB(**user_dict)
+
+
+def authenticate_user( db: session,username: str, password: str,):
+    # user = get_user(fake_db, username)
+    user = get_user_by_username(db=db,username=username)
+    if not user:
+        return False
+    if not verify_password(password, user.passwd):
+        return False
+    return user
+
+
+def create_access_token(db: session,data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+async def get_current_user(db: session,token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    
+    # user = get_user(fake_users_db, username=token_data.username)
+    user = get_user_by_username(username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+async def get_current_active_user(db: session,
+    current_user: Annotated[Usernopass, Depends(get_current_user)]
+):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+
+def login_for_access_token(db: session, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user = authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        db, data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+def read_users_me(db: session,
+    current_user: Annotated[Usernopass, Depends(get_current_active_user)]
+):
+    return current_user
+
+
+
+def read_own_items(db: session,
+    current_user: Annotated[Usernopass, Depends(get_current_active_user)]
+):
+    return [{"item_id": "Foo", "owner": current_user.username}]

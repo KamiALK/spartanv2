@@ -4,7 +4,7 @@ import router.crud
 from fastapi.responses import HTMLResponse
 from typing import Annotated
 from db.conection import engine,Session,Userdb,Base
-from schema.user_schema import UserData,Userschemanoid,Usernopass, UserID
+from schema.user_schema import UserData,Usernopass, UserID
 from fastapi.middleware.cors import CORSMiddleware
 
 # 
@@ -49,7 +49,7 @@ async def root():
     return {"messaje": "hola soy root de rutas"}
 
 
-@appi.get("/api/users/", response_model=list[UserID])
+@appi.get("/api/users/", response_model=list[Usernopass])
 def get_users (db:Session=Depends(get_db)):    
     return router.crud.get_users(db=db)
 
@@ -76,3 +76,22 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 @appi.post("/token")
 async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db) ):
     return login_for_access_token( form_data=form_data,db=db)
+
+
+
+@appi.get("/users/me/", response_model=Usernopass)
+async def read_users_me(db:Session=Depends(get_db),
+    current_user:Usernopass=Depends(router.crud.get_current_user)
+):
+    username=current_user
+    user=router.crud.get_user_by_username(db=db,username=username)
+    return user
+
+
+@appi.get("/users/me/items/")
+async def read_own_items(db:Session=Depends(get_db),
+    current_user:Usernopass=Depends(router.crud.get_current_user)
+):
+    username=current_user
+    user=router.crud.get_user_by_username(db=db,username=username)
+    return [{"item_id": "Foo", "owner": user.username}]

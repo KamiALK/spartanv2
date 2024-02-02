@@ -14,7 +14,7 @@ class UserSchemalogin (BaseModel):
 
 
 class UserData(BaseModel):
-    id: int | None = None
+    
     username: str
     nombre: str
     apellido: str
@@ -26,11 +26,11 @@ class UserData(BaseModel):
     passwd: str
     
 class UserID(UserData):
-    id: int | None = None
+    ID: int |None=None
 
     
 class Usernopass(BaseModel):
-    id: int | None = None
+    ID: int |None=None
     username: str
     nombre: str
     apellido: str

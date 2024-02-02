@@ -49,7 +49,7 @@ async def root():
     return {"messaje": "hola soy root de rutas"}
 
 
-@appi.get("/api/users/", response_model=list[Usernopass])
+@appi.get("/api/users/", response_model=list[UserID])
 def get_users (db:Session=Depends(get_db)):    
     return router.crud.get_users(db=db)
 
@@ -84,7 +84,7 @@ async def read_users_me(db:Session=Depends(get_db),
     current_user:Usernopass=Depends(router.crud.get_current_user)
 ):
     username=current_user
-    user=router.crud.get_user_by_username(db=db,username=username)
+    user:Usernopass=router.crud.get_user_by_username(db=db,username=username)
     return user
 
 

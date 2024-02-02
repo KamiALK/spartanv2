@@ -1,5 +1,5 @@
 from sqlalchemy.orm import session
-from schema.user_schema import UserID, TokenData,Token,Usernopass
+from schema.user_schema import UserID, TokenData,Token,Usernopass,UserData
 from passlib.context import CryptContext
 from db.conection import Userdb
 from datetime import datetime, timedelta
@@ -21,14 +21,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def get_users(db)->UserID:
-    users:UserID=db.query(Userdb).all()
-    return users
+def get_users(db):
+    
+    return db.query(Userdb).all()
 
 def get_user_by_cedula(db, cedula: int):
     user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
 
-def get_user_by_username(db, username: str)->Usernopass:
+def get_user_by_username(db, username: str)->UserID:
     user:UserID = db.query(Userdb).filter(Userdb.username == username).first()
     return user
     
@@ -81,7 +81,7 @@ def authenticate_user( db,username: str, password: str,)->UserID:
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(db,data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -92,8 +92,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def login_for_access_token(db, form_data: Annotated[OAuth2PasswordRequestForm, Depends()])->UserID:
-    user:UserID = authenticate_user(db, form_data.username, form_data.password)
+def login_for_access_token(db, form_data: Annotated[OAuth2PasswordRequestForm, Depends()])->UserData:
+    user:UserData = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -139,3 +139,14 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 
+def read_users_me(db: session,
+    current_user: Annotated[Userdb, Depends(get_current_user)]
+):
+    return current_user
+
+
+
+def read_own_items(db: session,
+    current_user: Annotated[Userdb, Depends(get_current_user)]
+):
+    return [{"item_id": "Foo", "owner": current_user.username}]

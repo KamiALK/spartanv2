@@ -93,5 +93,5 @@ async def read_own_items(db:Session=Depends(get_db),
     current_user:Usernopass=Depends(router.crud.get_current_user)
 ):
     username=current_user
-    user=router.crud.get_user_by_username(db=db,username=username)
+    user:UserData=router.crud.get_user_by_username(db=db,username=username)
     return [{"item_id": "Foo", "owner": user.username}]

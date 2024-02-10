@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 
-
+#prueba 
 
 
 
@@ -85,7 +85,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @appi.post("/token")
 async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db) ):
-    return login_for_access_token( form_data=form_data,db=db)
+    return login_for_access_token( form_data=form_data,db=db)   
 
 
 

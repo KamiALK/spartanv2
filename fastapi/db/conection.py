@@ -10,7 +10,7 @@
 # """
 # from sqlalchemy import create_engine, MetaData
 
-# engine = create_engine("mysql+pymysql://root:172839@localhost:3306/JUGADORES")
+# engine = create_engine("mysql+pymysql://root:123456@localhost:3306/JUGADORES")
 # Meta_Data = MetaData()
 
 

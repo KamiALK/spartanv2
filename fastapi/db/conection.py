@@ -10,7 +10,7 @@
 # """
 # from sqlalchemy import create_engine, MetaData
 
-# engine = create_engine("mysql+pymysql://root:123456@localhost:3306/JUGADORES")
+# engine = create_engine("mysql+pymysql://root:123@localhost:3306/JUGADORES")
 # Meta_Data = MetaData()
 
 
@@ -73,8 +73,8 @@ URL_CONECTION = '{}://{}:{}@{}/{}'.format(DB_DIALECT,DB_USER,DB_PASSWORD,DB_HOST
 engine = create_engine(URL_CONECTION, )
 Session = sessionmaker(autoflush=False, autocommit=False,bind=engine)
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
-
+print("hola")
 Session.close_all()
 

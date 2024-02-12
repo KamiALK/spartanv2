@@ -1,7 +1,8 @@
 from sqlalchemy.orm import session
 from schema.user_schema import UserID, TokenData,Token,Usernopass,UserData
 from passlib.context import CryptContext
-from db.conection import Userdb
+# from db.conection import Userdb
+from model.Userdb import Userdb
 from datetime import datetime, timedelta
 from typing import Annotated
 from fastapi import Depends,  HTTPException, status
@@ -9,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError 
 import jwt
 from passlib.context import CryptContext
-from db.conection import Userdb
+
 
 
 

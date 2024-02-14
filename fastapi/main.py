@@ -26,16 +26,18 @@ appi =FastAPI()
 # Aca estamos configurando los cors
 origin = [
 
+    "http://localhost:4321",
     "http://localhost",
     "http://localhost:3000",
 ]
 
 appi.add_middleware(
     CORSMiddleware,
-    allow_origins=origin,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    
 )
 
 

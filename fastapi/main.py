@@ -162,11 +162,13 @@ from fastapi.responses import HTMLResponse
 
 from fastapi.responses import HTMLResponse
 
-@appi.get("/users/me/")
-async def read_users_me(db=Depends(get_db),
+@appi.get("/users/me/", response_class=HTMLResponse)
+async def read_users_me(request: Request, db=Depends(get_db),
                         current_user: dict = Depends(router.crud.get_current_user)):
     try:
-        return current_user
+        print(current_user)  # Imprimir el contenido de current_user para verificar
+
+        return templates.TemplateResponse("user.html", {"request": request, "current_user": current_user})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")

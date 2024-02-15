@@ -10,7 +10,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError 
 import jwt
 from passlib.context import CryptContext
-
+from typing import Optional
+from fastapi import Cookie
 
 
 
@@ -30,7 +31,7 @@ def get_user_by_cedula(db, cedula: int):
     user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
 
 def get_user_by_username(db, username: str)->UserID:
-    user:UserID = db.query(Userdb).filter(Userdb.username == username).first()
+    user:UserID = db.query(Userdb).filter(Userdb.email == username).first()
     return user
     
 
@@ -103,12 +104,21 @@ def login_for_access_token(db, form_data: Annotated[OAuth2PasswordRequestForm, D
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        db, data={"sub": user.username}, expires_delta=access_token_expires
+        db, data={
+            "sub": user.username,
+            "nombre": user.nombre,
+            "apellido": user.apellido,
+            "email":user.email,
+            "username":user.username,
+                  
+                  }, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-# fake_users_db=get_users(Session=Depends(main.get_db))
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+
+
+
+def get_current_user(token: Optional[str] = Cookie(None)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -116,28 +126,27 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     )
 
     try:
+        if token is None:
+            raise credentials_exception
+        
+        # Aquí decodificas el token de la cookie y obtienes la información del usuario
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        
+        user_info = {
+            "username": username,
+            "nombre": payload.get("nombre"),
+            "apellido": payload.get("apellido"),
+            "email": payload.get("email"),
+            "username": payload.get("username"),
+            
+        }
+        return user_info
+    
     except JWTError:
         raise credentials_exception
-    
-    # user = get_user1(fake_users_db, username=token_data.username)
-    # # user = get_user_by_username(db, username=token_data.username)
-    
-    if token_data.username is None:
-        raise credentials_exception
-    return token_data.username
-
-
-# def get_current_active_user(db: session,
-#     current_user: Annotated[Usernopass, Depends(get_current_user)]
-# ):
-
-#     return current_user
-
 
 
 def read_users_me(db: session,
@@ -151,3 +160,11 @@ def read_own_items(db: session,
     current_user: Annotated[Userdb, Depends(get_current_user)]
 ):
     return [{"item_id": "Foo", "owner": current_user.username}]
+
+from typing import Dict
+
+def get_current_active_user(db: session,
+    current_user: Annotated[Usernopass, Depends(get_current_user)]
+):
+
+    return current_user

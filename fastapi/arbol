@@ -1,0 +1,41 @@
+.
+├── arbol
+├── config
+│   └── __init__.py
+├── db
+│   ├── conection.py
+│   ├── __init__.py
+│   └── __pycache__
+│       ├── conection.cpython-311.pyc
+│       └── __init__.cpython-311.pyc
+├── main.py
+├── model
+│   ├── __pycache__
+│   │   └── Userdb.cpython-311.pyc
+│   └── Userdb.py
+├── package-lock.json
+├── __pycache__
+│   └── main.cpython-311.pyc
+├── requirements.txt
+├── router
+│   ├── crud.py
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── crud.cpython-311.pyc
+│   │   ├── __init__.cpython-311.pyc
+│   │   └── routerPRUEBA.cpython-311.pyc
+│   └── routerPRUEBA.py
+├── schema
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-311.pyc
+│   │   └── user_schema.cpython-311.pyc
+│   └── user_schema.py
+└── templates
+    ├── components
+    │   ├── header.html
+    │   └── layout.html
+    ├── index.html
+    ├── login.html
+    ├── signup.html
+    └── user.html

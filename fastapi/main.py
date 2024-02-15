@@ -10,13 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 
-
-
-
-
 #prueba 
-
-
 
 # 
 appi =FastAPI()
@@ -29,6 +23,7 @@ origin = [
     "http://localhost:4321",
     "http://localhost",
     "http://localhost:3000",
+    "http://localhost:8000",
 ]
 
 appi.add_middleware(
@@ -81,30 +76,87 @@ async def create_user(user:UserData,db=Depends(get_db)):
     
     return created_user
 
+
+# @appi.get("/users/me/", response_model=Usernopass)
+# async def read_users_me(db=Depends(get_db),
+#     current_user:Usernopass=Depends(router.crud.get_current_user)
+# ):
+#     username=current_user
+#     user:Usernopass=router.crud.get_user_by_username(db=db,username=username)
+#     return user
+
+
+# @appi.get("/users/me/items/")
+# async def read_own_items(db=Depends(get_db),
+#     current_user:Usernopass=Depends(router.crud.get_current_user)
+# ):
+#     username=current_user
+#     user:UserData=router.crud.get_user_by_username(db=db,username=username)
+#     return [{"item_id": "Foo", "owner": user.username}]
+
+
+
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from router.crud import login_for_access_token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+from fastapi import Form
 
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi import Request
+
+templates = Jinja2Templates(directory="templates")
+
+
+# @appi.post("/token")
+# async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db = Depends(get_db) ):
+#     return login_for_access_token( form_data=form_data,db=db)   
+
+
+
+from fastapi import Cookie, HTTPException
+from fastapi.responses import RedirectResponse
+
+@appi.get("/token", response_class=HTMLResponse)
+async def login_get(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+from fastapi.responses import RedirectResponse
 
 @appi.post("/token")
-async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db = Depends(get_db) ):
-    return login_for_access_token( form_data=form_data,db=db)   
+async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db = Depends(get_db)):
+    token_data = login_for_access_token(form_data=form_data, db=db)
+    token_type = token_data['token_type']
+    if not token_data:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    response = RedirectResponse(url="/users/me", status_code=302)
+    response.set_cookie(key="token", value=token_data['access_token'],domain="localhost", path="/")
+    response.set_cookie(key="token_type", value=token_type, domain="localhost", path="/")
+
+    return response
+
+from fastapi import Cookie
+import logging 
+
+# Configura la configuración del registro según sea necesario
+logging.basicConfig(level=logging.DEBUG)  # Establece el nivel de registro
+
+# Luego, en tu código, puedes usar el logger para registrar mensajes
+logging.debug("Este es un mensaje de depuración")
+logging.info("Este es un mensaje informativo")
+logging.warning("Este es un mensaje de advertencia")
+logging.error("Este es un mensaje de error")
+logging.critical("Este es un mensaje crítico")
 
 
 
-@appi.get("/users/me/", response_model=Usernopass)
-async def read_users_me(db=Depends(get_db),
-    current_user:Usernopass=Depends(router.crud.get_current_user)
-):
-    username=current_user
-    user:Usernopass=router.crud.get_user_by_username(db=db,username=username)
-    return user
+@appi.get("/users/me")
+async def read_users_me(current_user: str = Depends(router.crud.get_current_user)):
+    return {"current_user": current_user}
+    
+    
 
 
-@appi.get("/users/me/items/")
-async def read_own_items(db=Depends(get_db),
-    current_user:Usernopass=Depends(router.crud.get_current_user)
-):
-    username=current_user
-    user:UserData=router.crud.get_user_by_username(db=db,username=username)
-    return [{"item_id": "Foo", "owner": user.username}]
+

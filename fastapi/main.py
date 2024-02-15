@@ -152,9 +152,28 @@ logging.critical("Este es un mensaje crítico")
 
 
 
-@appi.get("/users/me")
-async def read_users_me(current_user: str = Depends(router.crud.get_current_user)):
-    return {"current_user": current_user}
+# @appi.get("/users/me")
+# async def read_users_me(current_user: str = Depends(router.crud.get_current_user)):
+    
+#     user = {"current_user": current_user}
+    
+#     return user
+from fastapi.responses import HTMLResponse
+
+from fastapi.responses import HTMLResponse
+
+@appi.get("/users/me/")
+async def read_users_me(db=Depends(get_db),
+                        current_user: dict = Depends(router.crud.get_current_user)):
+    try:
+        return current_user
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+
+
     
     
 

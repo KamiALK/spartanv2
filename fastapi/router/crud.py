@@ -120,6 +120,7 @@ def login_for_access_token(db, form_data: Annotated[OAuth2PasswordRequestForm, D
 
 def get_current_user(token: Optional[str] = Cookie(None)):
     credentials_exception = HTTPException(
+        
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},

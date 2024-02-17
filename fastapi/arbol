@@ -33,6 +33,7 @@
 │   └── user_schema.py
 └── templates
     ├── components
+    │   ├── footer.html
     │   ├── header.html
     │   └── layout.html
     ├── index.html

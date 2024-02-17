@@ -7,15 +7,30 @@ from db.conection import engine,Session,Base
 from model.Userdb import Userdb
 from schema.user_schema import UserData,Usernopass, UserID
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from router.crud import login_for_access_token
+from fastapi import Form
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi import Request
 
 
 
-#prueba 
 
-# 
+
+
+
+
+# aqui la configuracion de archivos jin2
+from fastapi.staticfiles import StaticFiles
 appi =FastAPI()
+appi.mount("/static", StaticFiles(directory="static"), name="static")
 
-# appi.include_router(router.crud)
+templates = Jinja2Templates(directory="templates")
+
+
 
 # Aca estamos configurando los cors
 origin = [
@@ -36,7 +51,7 @@ appi.add_middleware(
 )
 
 
-
+#aqui la configuracion de la base de datos
 def get_db():
     db = Session()
     try:
@@ -51,7 +66,7 @@ uvicorn main:appi --reload
 
 '''
 
-    
+#aqui las rutas
 @appi.get("/")
 async def root():
     return {"messaje": "hola soy root de rutas"}
@@ -77,52 +92,22 @@ async def create_user(user:UserData,db=Depends(get_db)):
     return created_user
 
 
-# @appi.get("/users/me/", response_model=Usernopass)
-# async def read_users_me(db=Depends(get_db),
-#     current_user:Usernopass=Depends(router.crud.get_current_user)
-# ):
-#     username=current_user
-#     user:Usernopass=router.crud.get_user_by_username(db=db,username=username)
-#     return user
-
-
-# @appi.get("/users/me/items/")
-# async def read_own_items(db=Depends(get_db),
-#     current_user:Usernopass=Depends(router.crud.get_current_user)
-# ):
-#     username=current_user
-#     user:UserData=router.crud.get_user_by_username(db=db,username=username)
-#     return [{"item_id": "Foo", "owner": user.username}]
 
 
 
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from router.crud import login_for_access_token
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-from fastapi import Form
-
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-from fastapi import Request
-
-templates = Jinja2Templates(directory="templates")
-
-
-# @appi.post("/token")
-# async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db = Depends(get_db) ):
-#     return login_for_access_token( form_data=form_data,db=db)   
 
 
 
 from fastapi import Cookie, HTTPException
 from fastapi.responses import RedirectResponse
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @appi.get("/token", response_class=HTMLResponse)
 async def login_get(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-from fastapi.responses import RedirectResponse
+
 
 @appi.post("/token")
 async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db = Depends(get_db)):
@@ -137,36 +122,11 @@ async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(), d
 
     return response
 
-from fastapi import Cookie
-import logging 
-
-# Configura la configuración del registro según sea necesario
-logging.basicConfig(level=logging.DEBUG)  # Establece el nivel de registro
-
-# Luego, en tu código, puedes usar el logger para registrar mensajes
-logging.debug("Este es un mensaje de depuración")
-logging.info("Este es un mensaje informativo")
-logging.warning("Este es un mensaje de advertencia")
-logging.error("Este es un mensaje de error")
-logging.critical("Este es un mensaje crítico")
-
-
-
-# @appi.get("/users/me")
-# async def read_users_me(current_user: str = Depends(router.crud.get_current_user)):
-    
-#     user = {"current_user": current_user}
-    
-#     return user
-from fastapi.responses import HTMLResponse
-
-from fastapi.responses import HTMLResponse
-
 @appi.get("/users/me/", response_class=HTMLResponse)
 async def read_users_me(request: Request, db=Depends(get_db),
                         current_user: dict = Depends(router.crud.get_current_user)):
     try:
-        print(current_user)  # Imprimir el contenido de current_user para verificar
+        print(current_user) 
 
         return templates.TemplateResponse("user.html", {"request": request, "current_user": current_user})
     

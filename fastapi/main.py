@@ -90,16 +90,40 @@ async def get_users_all(request: Request,tipo: str = Path(...),db=Depends(get_db
     usuarios = router.crud.get_users(db=db,tipo=tipo)
     return templates.TemplateResponse("lista.html", {"request": request,  "usuarios": usuarios})
 
-@appi.get("/api/users/", response_model=list[UserID])
-def get_users (db=Depends(get_db)):    
-    return router.crud.get_users(db=db)
+# @appi.get("/api/users/", response_model=list[UserID])
+# def get_users (db=Depends(get_db),Tipo: str = Path(...)):    
+#     return router.crud.get_users(db=db)
+@appi.get("/{tipo}/{id:int}", response_class=HTMLResponse)  # Cambia ID a id
+def get_user(request: Request, id, db=Depends(get_db), tipo: str = Path(...)):  # Cambia ID a id
+    usuarios = router.crud.get_user_by_id(db=db, tipo=tipo, ID=id)  # Cambia ID a id
+    
+    if usuarios is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="no se ha encontrado el usuario")
+    return templates.TemplateResponse(
+        "lista_filter_id.html", 
+        {"request": request,  "usuarios": usuarios})
+    
 
-@appi.get("/api/user/{id:int}",response_model=UserID)
-def get_user(id, db=Depends(get_db)):
-    u = router.crud.get_user_by_id(db=db,id=id)
-    if u is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no se ha encontrado el usuario")
-    return router.crud.get_user_by_id(db=db, id=id)
+
+# @appi.get("/api/user/{id:int}",response_model=UserID)
+# def get_user(id, db=Depends(get_db),tipo: str = Path(...)):
+#     u = router.crud.get_user_by_id(db=db,id=id,tipo=tipo)
+#     if u is None:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no se ha encontrado el usuario")
+#     return router.crud.get_user_by_id(db=db, id=id)
+@appi.get("/{tipo}/", response_class=HTMLResponse)  # Cambia ID a id
+def get_user(request: Request, cedula, db=Depends(get_db), tipo: str = Path(...)):  # Cambia a cedula
+    usuarios = router.crud.get_user_by_cedula(db=db, tipo=tipo, cedula=cedula)  # Cambia ID a id
+    
+    if usuarios is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="no se ha encontrado el usuario")
+    return templates.TemplateResponse(
+        "lista_filter.html", 
+        {"request": request,  "usuarios": usuarios})
 
 @appi.post("/api/create",response_model=UserData)
 async def create_user(user:UserData,db=Depends(get_db)):

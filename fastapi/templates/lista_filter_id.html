@@ -1,0 +1,54 @@
+{% extends "components/layout.html" %} 
+
+{% block title %}Sign up{% endblock %} 
+{% block content %}
+<form id="user_form" method="post" onsubmit="return false;">
+    <input type="hidden" id="tipo_input" name="tipo" value="Jugadores">
+    <label for="id_input">Ingrese el ID:</label>
+    <input type="number" id="id_input" name="ID" oninput="updateLink()">
+    
+    <p>el id es: {{ id }}</p>
+    <a id="user_link" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border: none; border-radius: 5px;">FILTRAR</a>
+</form>
+
+<script>
+    function updateLink() {
+        var id = document.getElementById("id_input").value;
+        var link = document.getElementById("user_link");
+        link.href = "/Jugadores/" + id;
+    }
+</script>
+
+  
+<script>
+    document.getElementById("user_form").addEventListener("submit", function(event) {
+      event.preventDefault(); // Evita el envío del formulario
+      var id = document.getElementById("id_input").value; // Obtiene el valor del input
+      var link = document.getElementById("user_link"); // Obtiene el elemento del enlace
+      link.href = "/Jugadores/" + id; // Actualiza el href del enlace con el valor del input
+      link.setAttribute("data-id", id); // Actualiza el atributo data-id del enlace
+      link.innerHTML = id; // Actualiza el texto del enlace con el valor del input
+    });
+  </script>
+<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ usuarios.ID }}</td>
+        <td>{{ usuarios.username }}</td>
+        <td>{{ usuarios.nombre }}</td>
+        <td>{{ usuarios.apellido }}</td>
+        <td>{{ usuarios.email }}</td>
+      </tr>
+    </tbody>
+</table>
+
+{% endblock %}

@@ -33,18 +33,35 @@ def get_users(db, tipo: str):
         # Manejo de error si el tipo de usuario no existe
         return []
 
-
-
-# def get_user_by_username(db, username: str)->UserID:
+# def get_user_by_email(db, username: str)->UserID:
 #     user:UserID = db.query(Userdb).filter(Userdb.email == username).first()
 #     return user
+def get_user_by_id(db, ID: int, tipo: str):  # Cambia ID a id
+    clase_usuario = tipo_clase_mapping.get(tipo)
+    # Utiliza filter para buscar usuarios por ID
+    user = db.query(clase_usuario).filter_by(ID=ID).first()  # Cambia ID a ID
+    if user:
+        # print(f"El tipo de usuario es: {clase_usuario}")
+        return user
+    else:
+        # Manejo de error si el tipo de usuario no existe
+        return None
+
     
 
-# def get_user_by_id(db, id: int):
-#     user = db.query(Userdb).filter(Userdb.ID == id).first()
-#     return user
+
 # def get_user_by_cedula(db, cedula: int):
 #     user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
+def get_user_by_cedula(db, cedula: int, tipo: str):  # Cambia ID a id
+    clase_usuario = tipo_clase_mapping.get(tipo)
+    # Utiliza filter para buscar usuarios por ID
+    user = db.query(clase_usuario).filter_by(cedula=cedula).first()  # Cambia ID a ID
+    if user:
+        # print(f"El tipo de usuario es: {clase_usuario}")
+        return user
+    else:
+        # Manejo de error si el tipo de usuario no existe
+        return None
 
 # def create_user(db, user: UserID):
 #     # Hash the password before storing it in the database

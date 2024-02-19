@@ -27,8 +27,6 @@ def get_users(db):
     
     return db.query(Userdb).all()
 
-def get_user_by_cedula(db, cedula: int):
-    user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
 
 def get_user_by_username(db, username: str)->UserID:
     user:UserID = db.query(Userdb).filter(Userdb.email == username).first()
@@ -38,6 +36,8 @@ def get_user_by_username(db, username: str)->UserID:
 def get_user_by_id(db, id: int):
     user = db.query(Userdb).filter(Userdb.ID == id).first()
     return user
+def get_user_by_cedula(db, cedula: int):
+    user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
 
 def create_user(db, user: UserID):
     # Hash the password before storing it in the database
@@ -56,6 +56,37 @@ def create_user(db, user: UserID):
     db.flush(new_user)
     
     return new_user
+
+#!? ///////////////////////////////// PRUEBA DE MODIFICACIONES //////////////////////////////////////////
+def get_user_by_cedula(db, cedula: int, user_type: str):
+    # Construye dinámicamente el nombre de la clase según el tipo de usuario seleccionado
+    user_class = globals()[f"{user_type.capitalize()}db"]
+    user = db.query(user_class).filter(user_class.cedula == cedula).first()
+    return user
+# Modifica la función create_user para recibir el tipo de usuario como parámetro
+def create_user(db, user: UserID, user_type: str):
+    # Hash the password before storing it in the database
+    user.passwd = pwd_context.hash(user.passwd)
+
+    # Check if a user with the same cedula already exists
+    existing_user = get_user_by_cedula(db=db, cedula=user.cedula, user_type=user_type)
+    if existing_user:
+        return None  # User already exists
+    id=None
+    # Construye dinámicamente el nombre de la clase según el tipo de usuario seleccionado
+    user_class = globals()[f"{user_type.capitalize()}db"]
+    new_user = user_class(ID=id, username=user.username, nombre=user.nombre, apellido=user.apellido, celular=user.celular,
+                          edad=user.edad, cedula=user.cedula, genero=user.genero, email=user.email, passwd=user.passwd)
+    
+    db.add(new_user)
+    db.commit()
+    db.flush(new_user)
+    
+    return new_user
+
+# Modifica la función get_user_by_cedula para recibir el tipo de usuario como parámetro
+
+
 
 #!   /////////////////////////////////////////////////////////////
 

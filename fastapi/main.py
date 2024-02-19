@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, Response,Depends,HTTPException, status
+from fastapi import FastAPI, Query, Request, Form, Response,Depends,HTTPException, status
 from  sqlalchemy.orm import Session
 import router.crud 
 from fastapi.responses import HTMLResponse
@@ -15,6 +15,7 @@ from fastapi import Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi import Request
+from fastapi.responses import RedirectResponse
 
 
 
@@ -67,10 +68,27 @@ uvicorn main:appi --reload
 '''
 
 #aqui las rutas
-@appi.get("/", response_class=HTMLResponse)
-async def root(request: Request,):
- return templates.TemplateResponse("dash.html", {"request": request, })#"current_user": current_user}
+# @appi.get("/", response_class=HTMLResponse)
+# async def root(request: Request,):
+#  return templates.TemplateResponse("dash.html", {"request": request, })#"current_user": current_user}
+from fastapi.responses import RedirectResponse
 
+@appi.get("/", response_class=HTMLResponse)
+async def root(request: Request, tipo: str = Query(None)):
+    if tipo in ["jugador", "arbitro", "evaluador", "normal"]:
+        # Redirige al usuario a la ruta correspondiente
+        return RedirectResponse(url=f"/{tipo}", status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        # Si no se proporciona un tipo de usuario válido, simplemente muestra la página "dash"
+        return templates.TemplateResponse("dash.html", {"request": request})
+
+from fastapi import Path
+
+@appi.get("/{tipo}/login", response_class=HTMLResponse)
+async def login(tipo: str = Path(...)):
+    # Aquí puedes acceder al tipo de usuario seleccionado (tipo)
+    # y realizar las operaciones necesarias, como mostrar una página de inicio de sesión específica para ese tipo de usuario
+    return {"message": f"¡Bienvenido al inicio de sesión para {tipo}!"}
 
 @appi.get("/api/users/", response_model=list[UserID])
 def get_users (db=Depends(get_db)):    

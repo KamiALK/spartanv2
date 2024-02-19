@@ -86,11 +86,8 @@ async def root(request: Request, tipo: str = Query(None)):
 from fastapi import Path
 
 @appi.get("/{tipo}", response_class=HTMLResponse)
-async def get_users_tipolin(request: Request,tipo: str = Path(...),db=Depends(get_db)):
-    usuarios = router.crud.get_users_tipo(db=db,tipo=tipo)
-    
-    # Aquí puedes acceder al tipo de usuario seleccionado (tipo)
-    # y realizar las operaciones necesarias, como mostrar una página de inicio de sesión específica para ese tipo de usuario
+async def get_users_all(request: Request,tipo: str = Path(...),db=Depends(get_db)):
+    usuarios = router.crud.get_users(db=db,tipo=tipo)
     return templates.TemplateResponse("lista.html", {"request": request,  "usuarios": usuarios})
 
 @appi.get("/api/users/", response_model=list[UserID])

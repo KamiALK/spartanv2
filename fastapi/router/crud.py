@@ -23,13 +23,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def get_users(db):
-    
-    return db.query(Jugadores).all()
-def get_users_tipo(db, tipo: str):
+# def get_users(db):
+#     return db.query(Jugadores).all()
+def get_users(db, tipo: str):
     clase_usuario = tipo_clase_mapping.get(tipo)
-    
-    
     if clase_usuario:
         return db.query(clase_usuario).all()
     else:

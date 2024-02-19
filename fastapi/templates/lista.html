@@ -1,0 +1,23 @@
+<!-- login.html -->
+
+<table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Correo</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for usuario in usuarios %}
+      <tr>
+        <td>{{ usuario.username }}</td>
+        <td>{{ usuario.nombre }}</td>
+        <td>{{ usuario.apellido }}</td>
+        <td>{{ usuario.correo }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  

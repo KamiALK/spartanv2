@@ -4,7 +4,8 @@ import router.crud
 from fastapi.responses import HTMLResponse
 from typing import Annotated
 from db.conection import engine,Session,Base
-from model.Userdb import Userdb
+from model.Userdb import tipo_clase_mapping as mapping
+from model.Userdb import  Evaluadores,Arbitros,Jugadores
 from schema.user_schema import UserData,Usernopass, UserID
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -84,11 +85,13 @@ async def root(request: Request, tipo: str = Query(None)):
 
 from fastapi import Path
 
-@appi.get("/{tipo}/login", response_class=HTMLResponse)
-async def login(tipo: str = Path(...)):
+@appi.get("/{tipo}", response_class=HTMLResponse)
+async def get_users_tipolin(request: Request,tipo: str = Path(...),db=Depends(get_db)):
+    usuarios = router.crud.get_users_tipo(db=db,tipo=tipo)
+    
     # Aquí puedes acceder al tipo de usuario seleccionado (tipo)
     # y realizar las operaciones necesarias, como mostrar una página de inicio de sesión específica para ese tipo de usuario
-    return {"message": f"¡Bienvenido al inicio de sesión para {tipo}!"}
+    return templates.TemplateResponse("lista.html", {"request": request,  "usuarios": usuarios})
 
 @appi.get("/api/users/", response_model=list[UserID])
 def get_users (db=Depends(get_db)):    

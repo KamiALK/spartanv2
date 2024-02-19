@@ -12,7 +12,7 @@ usuarios_equipos = Table('usuarios_equipos', Base.metadata,
     Column('equipo_id', Integer, ForeignKey('equipos.ID'))
 )
 
-class Userdb(Base):
+class Jugadores(Base):
     __tablename__ = "usuarios"
     ID = Column("ID", Integer, primary_key=True, autoincrement=True)
     username = Column("username", String(250), nullable=False)
@@ -111,7 +111,7 @@ class Equipo(Base):
     __tablename__ = "equipos"
     ID = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(250), nullable=False)
-    jugadores = relationship("Userdb", secondary=usuarios_equipos, back_populates="equipos")
+    jugadores = relationship("Jugadores", secondary=usuarios_equipos, back_populates="equipos")
     partidos_local = relationship("Partido", foreign_keys="[Partido.equipo_local_id]", back_populates="equipo_local")
     partidos_visitante = relationship("Partido", foreign_keys="[Partido.equipo_visitante_id]", back_populates="equipo_visitante")
     campeonatos = relationship("Campeonato", secondary=campeonatos_equipos, back_populates="equipos")  # Esta línea se agregó
@@ -226,3 +226,12 @@ class Evaluaciones(Base):
     def __repr__(self):
         
         return f"Evaluaciones(arbitro_id={self.arbitro_id}, evaluador_id={self.evaluador_id}, estado_fisico={self.estado_fisico}, observacionesEF={self.observacionesEF}, desplazamiento={self.desplazamiento}, observacionesD={self.observacionesD}, lectura_de_juego={self.lectura_de_juego}, observacionesL={self.observacionesL}, control_de_juego={self.control_de_juego}, observacionesCDJ={self.observacionesCDJ}, nivelDificultadTorneo={self.nivelDificultadTorneo}, DificultadEtapaTorneo={self.DificultadEtapaTorneo}, temperaturaEquipos={self.temperaturaEquipos}, situacionesRealesI={self.situacionesRealesI}, faltasNAturalezaI={self.faltasNAturalezaI}, faltasTacticasI={self.faltasTacticasI}, situacionesRealesA={self.situacionesRealesA}, faltasNAturalezaA={self.faltasNAturalezaA}, faltasTacticasA={self.faltasTacticasA})"
+
+
+tipo_clase_mapping = {
+    "Jugadores": Jugadores,
+    "Arbitros": Arbitros,
+    "Evaluadores": Evaluadores,
+    
+    
+}

@@ -67,9 +67,9 @@ uvicorn main:appi --reload
 '''
 
 #aqui las rutas
-@appi.get("/")
-async def root():
-    return {"messaje": "hola soy root de rutas"}
+@appi.get("/", response_class=HTMLResponse)
+async def root(request: Request,):
+ return templates.TemplateResponse("dash.html", {"request": request, })#"current_user": current_user}
 
 
 @appi.get("/api/users/", response_model=list[UserID])

@@ -2,32 +2,84 @@
 
 {% block title %}Sign up{% endblock %} 
 {% block content %}
-<form id="user_form" method="post" onsubmit="return false;">
+<select id="filtro_select" onchange="mostrarFormulario()">
+  <option value="seleccion">Seleccione tipo de filtrado</option>
+  <option value="id">ID</option>
+  <option value="cedula">Cedula</option>
+</select>
+
+<form id="user_form" method="post" style="display: none;">
   <input type="hidden" id="tipo_input" name="tipo" value="Jugadores">
   <label for="id_input">Ingrese el ID:</label>
   <input type="number" id="id_input" name="ID" oninput="updateLink()">
   
-  <p>el id es: {{ id }}</p>
+  <p>El ID es: <span id="id_span"></span></p>
   <a id="user_link" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border: none; border-radius: 5px;">FILTRAR</a>
 </form>
 
-<script>
-  function updateLink() {
-      var id = document.getElementById("id_input").value;
-      var link = document.getElementById("user_link");
-      link.href = "/Jugadores/" + id;
-  }
-</script>
 
 <script>
-  document.getElementById("user_form").addEventListener("submit", function(event) {
-    event.preventDefault(); // Evita el envío del formulario
-    var id = document.getElementById("id_input").value; // Obtiene el valor del input
-    var link = document.getElementById("user_link"); // Obtiene el elemento del enlace
-    link.href = "/Jugadores/" + id; // Actualiza el href del enlace con el valor del input
-    link.setAttribute("data-id", id); // Actualiza el atributo data-id del enlace
-    link.innerHTML = id; // Actualiza el texto del enlace con el valor del input
-  });
+  function mostrarFormulario() {
+    var select = document.getElementById("filtro_select");
+    var idFormulario = document.getElementById("user_form");
+    var cedulaFormulario = document.getElementById("cedula_form");
+    var idSpan = document.getElementById("id_span");
+    var cedulaSpan = document.getElementById("cedula_span");
+
+    if (select.value === "id") {
+      idFormulario.style.display = "block";
+      cedulaFormulario.style.display = "none";
+      idSpan.innerText = "aquí se mostrará el ID ingresado";
+      cedulaSpan.innerText = "";
+    } else if (select.value === "cedula") {
+      idFormulario.style.display = "none";
+      cedulaFormulario.style.display = "block";
+      idSpan.innerText = "";
+      cedulaSpan.innerText = "aquí se mostrará la cédula ingresada";
+    } else {
+      idFormulario.style.display = "none";
+      cedulaFormulario.style.display = "none";
+      idSpan.innerText = "";
+      cedulaSpan.innerText = "";
+    }
+  }
+
+  function updateLink() {
+    var idInput = document.getElementById("id_input");
+    var userLink = document.getElementById("user_link");
+    userLink.href = "/Jugadores/" + idInput.value;
+  }
+
+  function updateLinkCedula() {
+    var cedulaInput = document.getElementById("cedula_input");
+    var cedulaLink = document.getElementById("cedula_link");
+    cedulaLink.href = "/Jugadores/cedula/" + cedulaInput.value;
+  }
+
+</script>
+
+<form id="cedula_form" method="post" style="display: none;">
+  <input type="hidden" id="tipo_input_cedula" name="tipo" value="Jugadores">
+  <label for="cedula_input">Ingrese la Cédula:</label>
+  <input type="text" id="cedula_input" name="Cedula" oninput="updateLinkCedula()">
+  
+  <p>La Cédula es: <span id="cedula_span"></span></p>
+  <a id="cedula_link" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border: none; border-radius: 5px;">FILTRAR</a>
+</form>
+
+<script>
+  function mostrarFormularioCedula() {
+    var formulario = document.getElementById("cedula_form");
+    formulario.style.display = "block";
+    var cedulaSpan = document.getElementById("cedula_span");
+    cedulaSpan.innerText = "aquí se mostrará la cédula ingresada"; // Puedes modificar este texto si deseas
+  }
+
+  function updateLinkCedula() {
+    var cedulaInput = document.getElementById("cedula_input");
+    var cedulaLink = document.getElementById("cedula_link");
+    cedulaLink.href = "/Jugadores/cedula/" + cedulaInput.value; // Forma la URL correctamente para Cédula
+  }
 </script>
 
 <table>
@@ -48,12 +100,9 @@
         <td>{{ usuario.nombre }}</td>
         <td>{{ usuario.apellido }}</td>
         <td>{{ usuario.email }}</td>
-        
-
-        
+        <td>{{ usuario.cedula }}</td>
       </tr>
       {% endfor %}
     </tbody>
 </table>
-
 {% endblock %}

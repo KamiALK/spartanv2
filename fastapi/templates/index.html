@@ -3,7 +3,7 @@
 {% block title %}Home{% endblock %} 
 {% block content %}
   <div class="row m-sm-5 m-3">
-    <h1 class="col">Evaluaciones El Bravuconnnn</h1>
+    <h1 class="col">Inicio de sesion  {{ tipo }}</h1>
   </div>
 
   <section class="row justify-content-center">
@@ -23,6 +23,10 @@
         <input name="password" type="password" class="form-control" id="exampleInputPassword1" required/>
       </div>
       <button type="submit" class="btn btn-primary">aceptar</button>
+      
+      <!-- incluimos un campo con el tipo de usuario -->
+      <input type="hidden" name="tipo" value="{{ tipo }}">
+      
     </form>
     
   </section>

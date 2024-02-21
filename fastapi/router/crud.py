@@ -3,7 +3,7 @@ from schema.user_schema import UserID, TokenData,Token,Usernopass,UserData
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from typing import Annotated
-from fastapi import Depends,  HTTPException, status
+from fastapi import Depends,  HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError 
 import jwt
@@ -33,9 +33,12 @@ def get_users(db, tipo: str):
         # Manejo de error si el tipo de usuario no existe
         return []
 
-# def get_user_by_email(db, username: str)->UserID:
-#     user:UserID = db.query(Userdb).filter(Userdb.email == username).first()
-#     return user
+def get_user_by_email(db, username: str, tipo: str)->UserID:
+    clase_usuario = tipo_clase_mapping.get(tipo)
+    print(clase_usuario)
+    # user:UserID = db.query(clase_usuario).filter(email == username).first()
+    user :UserID= db.query(clase_usuario).filter_by(email=username).first()
+    return user
 def get_user_by_id(db, ID: int, tipo: str):  # Cambia ID a id
     clase_usuario = tipo_clase_mapping.get(tipo)
     # Utiliza filter para buscar usuarios por ID
@@ -52,16 +55,34 @@ def get_user_by_id(db, ID: int, tipo: str):  # Cambia ID a id
 
 # def get_user_by_cedula(db, cedula: int):
 #     user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
-def get_user_by_cedula(db, cedula: int, tipo: str):  # Cambia ID a id
+def get_user_by_cedula(db, cedula: int, tipo: str):  #
     clase_usuario = tipo_clase_mapping.get(tipo)
     # Utiliza filter para buscar usuarios por ID
-    user = db.query(clase_usuario).filter_by(cedula=cedula).first()  # Cambia ID a ID
+    user = db.query(clase_usuario).filter_by(cedula=cedula).first() 
     if user:
         # print(f"El tipo de usuario es: {clase_usuario}")
         return user
     else:
         # Manejo de error si el tipo de usuario no existe
         return None
+
+def create_new_user(db, user: UserID, tipo:str):
+    clase_usuario = tipo_clase_mapping.get(tipo)
+    # Hash the password before storing it in the database
+    user.passwd = pwd_context.hash(user.passwd)
+    # Check if a user with the same cedula already exists
+    existing_user = get_user_by_cedula(db=db, cedula=user.cedula, tipo=tipo)
+    if existing_user:
+        return None  # User already exists
+    id=None
+    new_user =clase_usuario(ID=id,username=user.username, nombre=user.nombre, apellido=user.apellido, celular=user.celular,
+                      edad=user.edad, cedula=user.cedula, genero=user.genero, email=user.email, passwd=user.passwd)
+    
+    db.add(new_user)
+    db.commit()
+    db.flush(new_user)
+    
+    return new_user
 
 # def create_user(db, user: UserID):
 #     # Hash the password before storing it in the database
@@ -101,9 +122,12 @@ def get_user1(db, username: str):
         return Usernopass(**user_dict)
 
 
-def authenticate_user( db,username: str, password: str,)->UserID:
+def authenticate_user( db,username: str, password: str,tipo:str)->UserID:
     # user = get_user(fake_db, username)
-    user:UserID = get_user_by_username(db=db,username=username)
+    user:UserID = get_user_by_email(db=db,username=username, tipo = tipo)
+    print("Username:", username)
+    print("Password:", password)
+    print("Tipo:", tipo)
     if not user:
         return False
     if not verify_password(password, user.passwd):
@@ -122,8 +146,11 @@ def create_access_token(db,data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def login_for_access_token(db, form_data: Annotated[OAuth2PasswordRequestForm, Depends()])->UserData:
-    user:UserData = authenticate_user(db, form_data.username, form_data.password)
+def login_for_access_token(
+    db, 
+    tipo:str,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()])->UserData:
+    user:UserData = authenticate_user(db, form_data.username, form_data.password,tipo=tipo)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

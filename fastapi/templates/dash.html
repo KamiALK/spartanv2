@@ -7,9 +7,10 @@
   <div class="row m-sm-5 m-3">
     <h1 class="col">Evaluaciones El Bravuconnnn</h1>
   </div>
+  <!-- action="/token" -->
+  <section method="post"  class="row justify-content-center">
+    
 
-  <section method="get" action="/" class="row justify-content-center">
-  
     <div class="container">
       
       <!-- Contenido del pie de página -->
@@ -17,7 +18,8 @@
         <!-- Contenedor principal -->
         <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3 footer__main--first" style="font-size: 14px;">
           <h3>¡JUGADORES!</h3>
-          <a href="/Jugadores" data-tipo="Jugadores">
+          <a href="/Jugadores" tipo="Jugadores">
+            <input type="hidden" name="tipo" value="{{ tipo }}">
             <img src="/static/imagenes/jugador.png" alt="Redes sociales" style="max-width: 100%; max-height: 200px;">
           </a>
         
@@ -26,13 +28,17 @@
         <!-- Contenedor de Explora -->
         <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3" style="font-size: 14px;">
           <h3>¡ARBITROS!</h3>
-          <img src="/static/imagenes/arbitro.png" alt="Redes sociales" style="width: 200px; height: auto;">
+          <a href="/Arbitros" data-tipo="Arbitros">
+            <img src="/static/imagenes/arbitro.png" alt="Redes sociales" style="max-width: 100%; max-height: 200px;">
+          </a>
         </div>
 
         <!-- Contenedor para evaluadores -->
         <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3" style="font-size: 14px;">
           <h3>¡EVALUADORES!</h3>
-          <img src="/static/imagenes/evaluador.png" alt="Redes sociales" style="width: 200px; height: auto;">
+          <a href="/Evaluadores" data-tipo="Evaluadores">
+            <img src="/static/imagenes/evaluador.png" alt="Redes sociales" style="max-width: 100%; max-height: 200px;">
+          </a>
         </div>
 
         <!-- Contenedor de Exploracion -->
@@ -44,6 +50,24 @@
       </div>
     </div>
   </section>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Captura las imágenes
+        const images = document.querySelectorAll('.image-link');
+  
+        // Agrega un event listener a cada imagen
+        images.forEach(image => {
+            image.addEventListener('click', function (event) {
+                // Obtén el valor de 'tipo' desde el atributo data-tipo
+                const tipo = image.getAttribute('data-tipo');
+                
+                // Almacena el valor de 'tipo' en el localStorage
+                localStorage.setItem('tipo', tipo);
+            });
+        });
+    });
+  </script>
+
 
   {% include "components/section.html" %}
   {% include "components/footer.html" %}

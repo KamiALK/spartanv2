@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from typing import Optional
 from fastapi import Cookie
 from model.Userdb import tipo_clase_mapping 
-from model.Userdb import  Evaluadores,Arbitros,Jugadores
+
 
 
 
@@ -102,7 +102,7 @@ def create_new_user(db, user: UserID, tipo:str):
     
 #     return new_user
 
-#!? ///////////////////////////////// PRUEBA DE MODIFICACIONES //////////////////////////////////////////
+
 
 
 
@@ -224,3 +224,7 @@ def get_current_user(token: Optional[str] = Cookie(None)):
 # ):
 
 #     return current_user
+
+
+
+

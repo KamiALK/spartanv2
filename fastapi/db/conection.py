@@ -1,27 +1,10 @@
 
 
 
-#! /////////////////////////////////    CONEXION UNO   ////////////////////////////////////////
-
-# from sqlalchemy import create_engine, MetaData
-
-# """
-# base de datos : JUGADORES
-# TABLA: usuarios
-
-# """
-# from sqlalchemy import create_engine, MetaData
-
-# engine = create_engine("mysql+pymysql://root:172839@localhost:3306/JUGADORES")
-# Meta_Data = MetaData()
-
-
-# conn =engine.connect()
-# print("conexion exitosa")
 
 #!----------------------------------
-from sqlalchemy import create_engine, Table, Column, Select, CHAR, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import create_engine
+
 from sqlalchemy.orm import sessionmaker, Session
 from dotenv import load_dotenv
 import os

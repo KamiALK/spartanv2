@@ -1,16 +1,27 @@
 #aqui deben ir todos los modelos de la base de datos
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
+
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
+
 
 Base = declarative_base()
 
 
 usuarios_equipos = Table('usuarios_equipos', Base.metadata,
-    Column('usuario_id', Integer, ForeignKey('usuarios.ID')),
-    Column('equipo_id', Integer, ForeignKey('equipos.ID'))
+    Column('usuario_id', Integer, ForeignKey('usuarios.ID'),nullable=True),
+    Column('equipo_id', Integer, ForeignKey('equipos.ID'),nullable=True)
 )
+partido_arbitro = Table('partido_arbitro', Base.metadata,
+    Column('arbitro_id', Integer, ForeignKey('arbitros.ID'),nullable=True),
+    Column('partido_id', Integer, ForeignKey('partidos.ID'),nullable=True)
+)
+campeonatos_equipos = Table('campeonatos_equipos', Base.metadata,
+                            Column('campeonato_id', Integer, ForeignKey('campeonatos.ID'),nullable=True),
+                            Column('equipo_id', Integer, ForeignKey('equipos.ID'),nullable=True)
+                            )
+
 
 class Jugadores(Base):
     __tablename__ = "usuarios"
@@ -102,10 +113,6 @@ class Evaluadores(Base):
         return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
     
     
-campeonatos_equipos = Table('campeonatos_equipos', Base.metadata,
-                            Column('campeonato_id', Integer, ForeignKey('campeonatos.ID')),
-                            Column('equipo_id', Integer, ForeignKey('equipos.ID'))
-                            )
 
 class Equipo(Base):
     __tablename__ = "equipos"
@@ -114,7 +121,7 @@ class Equipo(Base):
     jugadores = relationship("Jugadores", secondary=usuarios_equipos, back_populates="equipos")
     partidos_local = relationship("Partido", foreign_keys="[Partido.equipo_local_id]", back_populates="equipo_local")
     partidos_visitante = relationship("Partido", foreign_keys="[Partido.equipo_visitante_id]", back_populates="equipo_visitante")
-    campeonatos = relationship("Campeonato", secondary=campeonatos_equipos, back_populates="equipos")  # Esta línea se agregó
+    campeonatos = relationship("Campeonato", secondary=campeonatos_equipos, back_populates="equipos")  
 
     def __init__(self, nombre):
         self.nombre = nombre
@@ -125,35 +132,6 @@ class Equipo(Base):
     
 
 
-class Partido(Base):
-    __tablename__ = "partidos"
-    ID = Column(Integer, primary_key=True, autoincrement=True)
-    campeonato_id = Column(Integer, ForeignKey('campeonatos.ID'), nullable=False)
-    equipo_local_id = Column(Integer, ForeignKey('equipos.ID'), nullable=False)
-    equipo_visitante_id = Column(Integer, ForeignKey('equipos.ID'), nullable=False)
-    arbitro1_id = Column(Integer, ForeignKey('arbitros.ID'), nullable=False)
-    arbitro2_id = Column(Integer, ForeignKey('arbitros.ID'))
-    arbitro3_id = Column(Integer, ForeignKey('arbitros.ID'))
-    arbitro4_id = Column(Integer, ForeignKey('arbitros.ID'))
-    campeonato = relationship("Campeonato", back_populates="partidos")
-    equipo_local = relationship("Equipo", foreign_keys=[equipo_local_id])
-    equipo_visitante = relationship("Equipo", foreign_keys=[equipo_visitante_id])
-    arbitro1 = relationship("Arbitros", foreign_keys=[arbitro1_id])  # Cambio aquí
-    arbitro2 = relationship("Arbitros", foreign_keys=[arbitro2_id])  # Cambio aquí
-    arbitro3 = relationship("Arbitros", foreign_keys=[arbitro3_id])  # Cambio aquí
-    arbitro4 = relationship("Arbitros", foreign_keys=[arbitro4_id])  # Cambio aquí
-
-    def __init__(self, campeonato_id, equipo_local_id, equipo_visitante_id, arbitro1_id, arbitro2_id=None, arbitro3_id=None, arbitro4_id=None):
-        self.campeonato_id = campeonato_id
-        self.equipo_local_id = equipo_local_id
-        self.equipo_visitante_id = equipo_visitante_id
-        self.arbitro1_id = arbitro1_id
-        self.arbitro2_id = arbitro2_id
-        self.arbitro3_id = arbitro3_id
-        self.arbitro4_id = arbitro4_id
-
-    def __repr__(self):
-        return f"Partido(ID={self.ID}, campeonato_id={self.campeonato_id}, equipo_local_id={self.equipo_local_id}, equipo_visitante_id={self.equipo_visitante_id}, arbitro1_id={self.arbitro1_id}, arbitro2_id={self.arbitro2_id}, arbitro3_id={self.arbitro3_id}, arbitro4_id={self.arbitro4_id})"
 
 
 # Tabla de asociación entre Campeonatos y Equipos
@@ -162,7 +140,6 @@ class Campeonato(Base):
     __tablename__ = "campeonatos"
     ID = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(250), nullable=False)
-    # Otros campos del campeonato aquí
     equipos = relationship("Equipo", secondary=campeonatos_equipos, back_populates="campeonatos")
     partidos = relationship("Partido", back_populates="campeonato")
 
@@ -172,7 +149,29 @@ class Campeonato(Base):
     def __repr__(self):
         return f"Campeonato(ID={self.ID}, nombre={self.nombre})"
 
+    @classmethod
+    def __get_pydantic_core_schema__(cls, model):
+        # Aquí implementa la lógica para generar un esquema Pydantic para la clase Campeonato
+        pass
 
+class Partido(Base):
+    __tablename__ = "partidos"
+    ID = Column(Integer, primary_key=True, autoincrement=True)
+    campeonato_id = Column(Integer, ForeignKey('campeonatos.ID'), nullable=True)
+    fecha = Column(DateTime, nullable=True)
+    lugar = Column(String(250), nullable=True)
+    equipo_local_id = Column(Integer, ForeignKey('equipos.ID'), nullable=True)
+    equipo_visitante_id = Column(Integer, ForeignKey('equipos.ID'), nullable=True)
+
+    # Relación con árbitros a través de la tabla de asociación partido_arbitro
+    arbitros = relationship("Arbitros", secondary=partido_arbitro)
+
+    campeonato = relationship("Campeonato", back_populates="partidos")
+    equipo_local = relationship("Equipo", foreign_keys=[equipo_local_id])
+    equipo_visitante = relationship("Equipo", foreign_keys=[equipo_visitante_id])
+
+    def __repr__(self):
+        return f"Partido(ID={self.ID}, campeonato_id={self.campeonato_id}, fecha={self.fecha}, lugar={self.lugar}, equipo_local_id={self.equipo_local_id}, equipo_visitante_id={self.equipo_visitante_id})"
 
 class Evaluaciones(Base):
     __tablename__ = "evaluaciones"

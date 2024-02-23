@@ -1,13 +1,9 @@
-from fastapi import FastAPI, Query, Request, Form, Response,Depends,HTTPException, status
-from typing import Optional 
+from fastapi import FastAPI, Query, Request, Form,Depends,HTTPException, status
 from  sqlalchemy.orm import Session
 import router.crud 
 from fastapi.responses import HTMLResponse
-from typing import Annotated
-from db.conection import engine,Session,Base
-from model.Userdb import tipo_clase_mapping as mapping
-from model.Userdb import  Evaluadores,Arbitros,Jugadores
-from schema.user_schema import UserData,Usernopass, UserID
+from db.conection import Session
+from schema.user_schema import UserData
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from router.crud import login_for_access_token
@@ -19,12 +15,18 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi import Path
+from fastapi import Query
+import router.router_estructura as partido_router
 
+# from model.Get_DB import get_db
 
-
+# db:Session = Depends(get_db)
 
 # aqui la configuracion de archivos jin2
 appi =FastAPI()
+
+
+
 appi.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
@@ -58,6 +60,8 @@ def get_db():
     finally:
         db.close()
 
+
+appi.include_router(partido_router.router)
 
 '''
 uvicorn main:appi --reload 
@@ -106,19 +110,8 @@ def get_user(request: Request, cedula, db=Depends(get_db), tipo: str = Path(...)
     return templates.TemplateResponse(
         "lista_filter_cedula.html", 
         {"request": request,  "usuarios": usuarios})
-    
-    
-    
 
-
-@appi.post("/api/create",response_model=UserData)
-async def create_user(user:UserData,db=Depends(get_db)):
-    created_user = router.crud.create_user(db=db, user=user)
-    if created_user is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuario ya existe")
-    
-    return created_user
-
+#!!!!!!!!!!!!!!!!!!!!!!! creacion de usuario
 @appi.post("/usuarios/registro", response_model=UserData)
 async def create_user(request: Request, username: str = Form(...), nombre: str = Form(...), apellido: str = Form(...), celular: int = Form(...), edad: int = Form(...), cedula: int = Form(...), genero: str = Form(...), email: str = Form(...), passwd: str = Form(...), tipo: str = Form(...), db=Depends(get_db)):
     user_data = UserData(username=username, nombre=nombre, apellido=apellido, celular=celular, edad=edad, cedula=cedula, genero=genero, email=email, passwd=passwd)
@@ -138,35 +131,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 
-# @appi.get("/token", response_class=HTMLResponse)
-# async def login_get(request: Request, tipo: str ):
-#     return templates.TemplateResponse("index_a.html", {"request": request, "tipo": tipo})
-
-# @appi.post("/token")
-# async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db = Depends(get_db)):
-    
-#     token_data = login_for_access_token(form_data=form_data, db=db)
-#     token_type = token_data['token_type']
-#     if not token_data:
-#         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-#     response = RedirectResponse(url="/users/me", status_code=302)
-#     response.set_cookie(key="token", value=token_data['access_token'],domain="localhost", path="/")
-#     response.set_cookie(key="token_type", value=token_type, domain="localhost", path="/")
-
-#     return response
-
-from fastapi import Query
 
 
-
-
-
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! login de usuario
 @appi.get("/token")
 async def obtener_tipo(request: Request, tipo: str):
     print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
     print(tipo)
     return {"tipo": tipo}
+
 @appi.post("/token")
 async def login_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -199,10 +172,15 @@ async def read_users_me(request: Request, db=Depends(get_db),
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+#!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    LOGOUT   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@appi.get("/logout")
+async def logout(request: Request):
+    response = RedirectResponse(url="/", status_code=302)
+    response.delete_cookie(key="token")
+    response.delete_cookie(key="token_type")
+    return response
 
 
-    
-    
 
 
 

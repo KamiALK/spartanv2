@@ -6,35 +6,14 @@ from model.Userdb import Partido, Campeonato, Evaluaciones, Equipo
 from schema.user_schema import UserID,UserData
 from typing import List, Optional
 
-
-
-
-
-
-
-
-
 class JugadoresBase(UserID):
     pass
-
 
 class ArbitrosBase(UserID):
     pass
 
-
 class EvaluadoresBase(UserID):
     pass
-
-
-
-
-class PartidoBase(BaseModel):
-    campeonato_id: int
-    fecha: datetime
-    lugar: str
-    equipo_local_id: int
-    equipo_visitante_id: int
-
 
 class EvaluacionesBase(BaseModel):
     arbitro_id: int
@@ -57,32 +36,33 @@ class EvaluacionesBase(BaseModel):
     faltasNaturalezaI: int
     faltasTacticasI: int
 
-
-class Jugadores(JugadoresBase):
-    ID: int
-
-    class Config:
-        from_attributes = True
-
-
 class Arbitros(ArbitrosBase):
     ID: int
 
     class Config:
         from_attributes = True
 
-
 class Evaluadores(EvaluadoresBase):
     ID: int
 
     class Config:
         from_attributes = True
+
 class Evaluaciones(EvaluacionesBase):
     ID: int
 
     class Config:
         from_attributes = True
         
+class PartidoBase(BaseModel):
+    campeonato_id: int
+    fecha: datetime
+    lugar: str
+    equipo_local_id: Optional[int]
+    equipo_visitante_id: Optional[int]
+
+
+
 class Partido(PartidoBase):
     ID: int
     arbitros: List[Arbitros] = []
@@ -90,19 +70,30 @@ class Partido(PartidoBase):
     class Config:
         from_attributes = True
 
+# class EquipoSchema(BaseModel):
+#     ID: int
+#     nombre: str
+#     jugadores: Optional[List[JugadoresBase]] = None
 class EquipoSchema(BaseModel):
-    ID: int
+    ID: Optional[int]
     nombre: str
+    jugadores_id: Optional[List[int]] = None
 
-class PartidoSchema(BaseModel):
+    
+    
+class Jugadores(JugadoresBase):
     ID: int
-    fecha: str
-    lugar: str
+    equipo: Optional[List[EquipoSchema]] = None
+
+    class Config:
+        from_attributes = True
+
+
 class CampeonatoSchema(BaseModel):
     ID: int
     nombre: str
     equipos: List[EquipoSchema] = []
-    partidos: List[PartidoSchema] = []
+    partidos: List[PartidoBase] = []
 
     class Config:
         from_attributes = True

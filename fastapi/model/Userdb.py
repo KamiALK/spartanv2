@@ -51,7 +51,6 @@ class Jugadores(Base):
     def __repr__(self):
         return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
 
-
 class Arbitros(Base):
     __tablename__ = "arbitros"
     ID = Column("ID", Integer, primary_key=True, autoincrement=True)
@@ -79,9 +78,6 @@ class Arbitros(Base):
         self.evaluaciones = []
     def __repr__(self):
         return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
-    
-    
-    
     
 class Evaluadores(Base):
     __tablename__ = "evaluadores"
@@ -118,6 +114,7 @@ class Equipo(Base):
     __tablename__ = "equipos"
     ID = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(250), nullable=False)
+    lider_id = Column(Integer, ForeignKey('usuarios.ID'), nullable=True)  # Campo opcional de líder
     jugadores = relationship("Jugadores", secondary=usuarios_equipos, back_populates="equipos")
     partidos_local = relationship("Partido", foreign_keys="[Partido.equipo_local_id]", back_populates="equipo_local")
     partidos_visitante = relationship("Partido", foreign_keys="[Partido.equipo_visitante_id]", back_populates="equipo_visitante")
@@ -128,6 +125,7 @@ class Equipo(Base):
 
     def __repr__(self):
         return f"Equipo(ID={self.ID}, nombre={self.nombre})"
+
 
     
 

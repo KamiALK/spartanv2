@@ -16,8 +16,10 @@ class EvaluadoresBase(UserID):
     pass
 
 class EvaluacionesBase(BaseModel):
+    ID: int
     arbitro_id: int
     evaluador_id: int
+    partido_id: int
     estado_fisico: int
     observacionesEF: Optional[str] = None
     desplazamiento: int
@@ -42,8 +44,7 @@ class Arbitros(ArbitrosBase):
     class Config:
         from_attributes = True
 
-class Evaluadores(EvaluadoresBase):
-    ID: int
+
 
     class Config:
         from_attributes = True
@@ -70,16 +71,34 @@ class Partido(PartidoBase):
     class Config:
         from_attributes = True
 
-# class EquipoSchema(BaseModel):
-#     ID: int
-#     nombre: str
-#     jugadores: Optional[List[JugadoresBase]] = None
+
 class EquipoSchema(BaseModel):
     ID: Optional[int]
     nombre: str
+    lider_id: Optional[List[int]] = None
     jugadores_id: Optional[List[int]] = None
 
+class partido_arbitro_scheme(BaseModel):
+    partido_id: int 
+    arbitro_1_id: Optional[int] = None
+    arbitro_2_id: Optional[int] = None
+    arbitro_3_id: Optional[int] = None
+    arbitro_4_id: Optional[int] = None
     
+    class Config:
+        from_attributes = True    
+
+class arbitro_asignacion_scheme(BaseModel):
+    partido_id: int 
+    arbitro_1_id: Optional[int] = None
+    arbitro_2_id: Optional[int] = None
+    arbitro_3_id: Optional[int] = None
+    arbitro_4_id: Optional[int] = None
+    evaluacion_id: Optional[int] = None 
+
+    class Config:
+        from_attributes = True
+
     
 class Jugadores(JugadoresBase):
     ID: int

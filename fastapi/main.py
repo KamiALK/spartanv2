@@ -79,12 +79,17 @@ async def root(request: Request, tipo: str = Query(None)):
 
 
 
-@appi.get("/{tipo}", response_class=HTMLResponse)
+@appi.get("/{tipo}/", response_class=HTMLResponse)
 async def get_users_all(request: Request,tipo: str = Path(...),db=Depends(get_db)):
     usuarios = router.crud.get_users(db=db,tipo=tipo)
     print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
     return templates.TemplateResponse("index.html", {"request": request, "tipo": tipo,  "usuarios": usuarios})
-    
+
+@appi.get("/{tipo}/users")
+async def get_users_all(request: Request,tipo: str = Path(...),db=Depends(get_db)):
+    usuarios = router.crud.get_users(db=db,tipo=tipo)
+    print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
+    return usuarios
 
 @appi.get("/{tipo}/{id:int}", response_class=HTMLResponse)  # Cambia ID a id
 def get_user(request: Request, id, db=Depends(get_db), tipo: str = Path(...)):  # Cambia ID a id
@@ -111,7 +116,7 @@ def get_user(request: Request, cedula, db=Depends(get_db), tipo: str = Path(...)
         "lista_filter_cedula.html", 
         {"request": request,  "usuarios": usuarios})
 
-#!!!!!!!!!!!!!!!!!!!!!!! creacion de usuario
+#!!!!!!!!!!!!!!!!!!!!!!!     creacion de usuario
 @appi.post("/usuarios/registro", response_model=UserData)
 async def create_user(request: Request, username: str = Form(...), nombre: str = Form(...), apellido: str = Form(...), celular: int = Form(...), edad: int = Form(...), cedula: int = Form(...), genero: str = Form(...), email: str = Form(...), passwd: str = Form(...), tipo: str = Form(...), db=Depends(get_db)):
     user_data = UserData(username=username, nombre=nombre, apellido=apellido, celular=celular, edad=edad, cedula=cedula, genero=genero, email=email, passwd=passwd)
@@ -133,7 +138,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! login de usuario
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     login de usuario
 @appi.get("/token")
 async def obtener_tipo(request: Request, tipo: str):
     print("Valor de tipo antes de llamar a get_user_by_email:", tipo)

@@ -1,7 +1,4 @@
-#aqui deben ir todos los modelos de la base de datos
-
-
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Table
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Table, or_
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -13,14 +10,33 @@ usuarios_equipos = Table('usuarios_equipos', Base.metadata,
     Column('usuario_id', Integer, ForeignKey('usuarios.ID'),nullable=True),
     Column('equipo_id', Integer, ForeignKey('equipos.ID'),nullable=True)
 )
-partido_arbitro = Table('partido_arbitro', Base.metadata,
-    Column('arbitro_id', Integer, ForeignKey('arbitros.ID'),nullable=True),
-    Column('partido_id', Integer, ForeignKey('partidos.ID'),nullable=True)
-)
-campeonatos_equipos = Table('campeonatos_equipos', Base.metadata,
-                            Column('campeonato_id', Integer, ForeignKey('campeonatos.ID'),nullable=True),
-                            Column('equipo_id', Integer, ForeignKey('equipos.ID'),nullable=True)
-                            )
+
+class CampeonatoEquipo(Base):
+    __tablename__ = "campeonatos_equipos"
+    campeonato_id = Column(Integer, ForeignKey('campeonatos.ID'), primary_key=True)
+    equipo_id = Column(Integer, ForeignKey('equipos.ID'), primary_key=True)
+    campeonato = relationship("Campeonato", back_populates="equipos_asociados")
+    equipo = relationship("Equipo", back_populates="campeonatos_asociados")
+
+class Arbitro_asignacion_Partido(Base):
+    __tablename__ = "arbitros_partidos"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    partido_id = Column(Integer, ForeignKey("partidos.ID"))
+    
+    arbitro_1_id = Column(Integer, ForeignKey('arbitros.ID'))
+    arbitro_2_id = Column(Integer, ForeignKey('arbitros.ID'))
+    arbitro_3_id = Column(Integer, ForeignKey('arbitros.ID'))
+    arbitro_4_id = Column(Integer, ForeignKey('arbitros.ID'))
+    evaluacion_id = Column(Integer, ForeignKey("evaluaciones.ID"))  # Nueva columna para el ID de la evaluación
+
+    partido = relationship("Partido", back_populates="arbitros")  # Corregir el nombre de la relación
+    evaluacion = relationship("Evaluaciones")  
+    arbitro_1 = relationship("Arbitros", foreign_keys=[arbitro_1_id])
+    arbitro_2 = relationship("Arbitros", foreign_keys=[arbitro_2_id])
+    arbitro_3 = relationship("Arbitros", foreign_keys=[arbitro_3_id])
+    arbitro_4 = relationship("Arbitros", foreign_keys=[arbitro_4_id])
+
+
 
 
 class Jugadores(Base):
@@ -81,18 +97,17 @@ class Arbitros(Base):
     
 class Evaluadores(Base):
     __tablename__ = "evaluadores"
-    ID = Column("ID", Integer, primary_key=True, autoincrement=True)
-    username = Column("username", String(250), nullable=False)
-    nombre = Column("nombre", String(250), nullable=False)
-    apellido = Column("apellido", String(250), nullable=False)
-    celular = Column("celular", Integer, nullable=False)
-    edad = Column("edad", Integer, nullable=False)
-    cedula = Column("cedula", Integer, unique=True, nullable=False)
-    genero = Column("genero", String(250), nullable=False)
-    email = Column("email", String(250), nullable=False)
-    passwd = Column("passwd", String(250), nullable=False)
-    evaluaciones = relationship("Evaluaciones", back_populates="evaluador")
-    
+    ID = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(250), nullable=False)
+    nombre = Column(String(250), nullable=False)
+    apellido = Column(String(250), nullable=False)
+    celular = Column(Integer, nullable=False)
+    edad = Column(Integer, nullable=False)
+    cedula = Column(Integer, unique=True, nullable=False)
+    genero = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False)
+    passwd = Column(String(250), nullable=False)
+    evaluaciones = relationship("Evaluaciones", back_populates="evaluador")  # Corregir esta línea
     def __init__(self, ID, username, nombre, apellido, celular, edad, cedula, genero, email, passwd):
         self.ID = ID
         self.username = username
@@ -106,9 +121,8 @@ class Evaluadores(Base):
         self.passwd = passwd
         self.evaluaciones = []
     def __repr__(self):
-        return f"({self.ID}){self.username}{self.nombre}{self.apellido}({self.celular},{self.edad},{self.cedula}){self.genero}{self.email}{self.passwd}"
-    
-    
+        return f"Evaluadores(ID={self.ID}, username={self.username}, nombre={self.nombre}, apellido={self.apellido}, celular={self.celular}, edad={self.edad}, cedula={self.cedula}, genero={self.genero}, email={self.email}, passwd={self.passwd})"
+
 
 class Equipo(Base):
     __tablename__ = "equipos"
@@ -118,7 +132,7 @@ class Equipo(Base):
     jugadores = relationship("Jugadores", secondary=usuarios_equipos, back_populates="equipos")
     partidos_local = relationship("Partido", foreign_keys="[Partido.equipo_local_id]", back_populates="equipo_local")
     partidos_visitante = relationship("Partido", foreign_keys="[Partido.equipo_visitante_id]", back_populates="equipo_visitante")
-    campeonatos = relationship("Campeonato", secondary=campeonatos_equipos, back_populates="equipos")  
+    campeonatos_asociados = relationship("CampeonatoEquipo", back_populates="equipo")  
 
     def __init__(self, nombre):
         self.nombre = nombre
@@ -127,18 +141,11 @@ class Equipo(Base):
         return f"Equipo(ID={self.ID}, nombre={self.nombre})"
 
 
-    
-
-
-
-
-# Tabla de asociación entre Campeonatos y Equipos
-
 class Campeonato(Base):
     __tablename__ = "campeonatos"
     ID = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(250), nullable=False)
-    equipos = relationship("Equipo", secondary=campeonatos_equipos, back_populates="campeonatos")
+    equipos_asociados = relationship("CampeonatoEquipo", back_populates="campeonato")
     partidos = relationship("Partido", back_populates="campeonato")
 
     def __init__(self, nombre):
@@ -147,10 +154,6 @@ class Campeonato(Base):
     def __repr__(self):
         return f"Campeonato(ID={self.ID}, nombre={self.nombre})"
 
-    @classmethod
-    def __get_pydantic_core_schema__(cls, model):
-        # Aquí implementa la lógica para generar un esquema Pydantic para la clase Campeonato
-        pass
 
 class Partido(Base):
     __tablename__ = "partidos"
@@ -158,24 +161,26 @@ class Partido(Base):
     campeonato_id = Column(Integer, ForeignKey('campeonatos.ID'), nullable=True)
     fecha = Column(DateTime, nullable=True)
     lugar = Column(String(250), nullable=True)
+    publico_privado = Column(String(250), nullable=True)
+    estado = Column(String(250), nullable=True)
     equipo_local_id = Column(Integer, ForeignKey('equipos.ID'), nullable=True)
     equipo_visitante_id = Column(Integer, ForeignKey('equipos.ID'), nullable=True)
-
-    # Relación con árbitros a través de la tabla de asociación partido_arbitro
-    arbitros = relationship("Arbitros", secondary=partido_arbitro)
 
     campeonato = relationship("Campeonato", back_populates="partidos")
     equipo_local = relationship("Equipo", foreign_keys=[equipo_local_id])
     equipo_visitante = relationship("Equipo", foreign_keys=[equipo_visitante_id])
-
+    arbitros = relationship("Arbitro_asignacion_Partido", back_populates="partido")
     def __repr__(self):
         return f"Partido(ID={self.ID}, campeonato_id={self.campeonato_id}, fecha={self.fecha}, lugar={self.lugar}, equipo_local_id={self.equipo_local_id}, equipo_visitante_id={self.equipo_visitante_id})"
+
 
 class Evaluaciones(Base):
     __tablename__ = "evaluaciones"
     ID = Column(Integer, primary_key=True, autoincrement=True)
-    arbitro_id = Column(Integer, ForeignKey('arbitros.ID'), nullable=False)
-    evaluador_id = Column(Integer, ForeignKey('evaluadores.ID'), nullable=False)
+    arbitro_id = Column(Integer, ForeignKey('arbitros.ID'), nullable=True)
+    evaluador_id = Column(Integer, ForeignKey('evaluadores.ID'), nullable=True)
+    partido_id = Column(Integer, nullable=True)
+    
     estado_fisico = Column(Integer, nullable=False)
     observacionesEF = Column(String(250), nullable=True)
     desplazamiento = Column(Integer, nullable=False)
@@ -193,37 +198,14 @@ class Evaluaciones(Base):
     situacionesRealesI = Column(Integer, nullable=False)
     faltasNaturalezaI = Column(Integer, nullable=False)
     faltasTacticasI = Column(Integer, nullable=False)
-    # Establece las relaciones con las tablas Arbitros y Evaluadores
-    arbitro = relationship("Arbitros", back_populates="evaluaciones")
-    evaluador = relationship("Evaluadores", back_populates="evaluaciones")
-
     
-    def __init__(self,arbitro_id,evaluador_id,estado_fisico,observacionesEF,desplazamiento,observacionesD,lectura_de_juego,observacionesL,control_de_juego,observacionesCDJ,nivelDificultadTorneo,DificultadEtapaTorneo,temperaturaEquipos,situacionesRealesI,faltasNAturalezaI,faltasTacticasI,situacionesRealesA,faltasNAturalezaA,faltasTacticasA):
-        self.arbitro_id=arbitro_id
-        self.evaluador_id=evaluador_id
-        self.estado_fisico=estado_fisico
-        self.observacionesEF=observacionesEF
-        self.desplazamiento=desplazamiento
-        self.observacionesD=observacionesD
-        self.lectura_de_juego=lectura_de_juego
-        self.observacionesL=observacionesL
-        self.control_de_juego=control_de_juego
-        self.observacionesCDJ=observacionesCDJ
-        self.nivelDificultadTorneo=nivelDificultadTorneo
-        self.DificultadEtapaTorneo=DificultadEtapaTorneo
-        self.temperaturaEquipos=temperaturaEquipos
-        self.situacionesRealesI=situacionesRealesI
-        self.faltasNAturalezaI=faltasNAturalezaI
-        self.faltasTacticasI=faltasTacticasI
-        self.situacionesRealesA=situacionesRealesA
-        self.faltasNAturalezaA=faltasNAturalezaA
-        self.faltasTacticasA=faltasTacticasA
-        
-        
-    def __repr__(self):
-        
-        return f"Evaluaciones(arbitro_id={self.arbitro_id}, evaluador_id={self.evaluador_id}, estado_fisico={self.estado_fisico}, observacionesEF={self.observacionesEF}, desplazamiento={self.desplazamiento}, observacionesD={self.observacionesD}, lectura_de_juego={self.lectura_de_juego}, observacionesL={self.observacionesL}, control_de_juego={self.control_de_juego}, observacionesCDJ={self.observacionesCDJ}, nivelDificultadTorneo={self.nivelDificultadTorneo}, DificultadEtapaTorneo={self.DificultadEtapaTorneo}, temperaturaEquipos={self.temperaturaEquipos}, situacionesRealesI={self.situacionesRealesI}, faltasNAturalezaI={self.faltasNAturalezaI}, faltasTacticasI={self.faltasTacticasI}, situacionesRealesA={self.situacionesRealesA}, faltasNAturalezaA={self.faltasNAturalezaA}, faltasTacticasA={self.faltasTacticasA})"
+    
+    arbitro = relationship("Arbitros", foreign_keys=[arbitro_id], back_populates="evaluaciones")
+    evaluador = relationship("Evaluadores", foreign_keys=[evaluador_id], back_populates="evaluaciones")  
+    
 
+    def __repr__(self):
+        return f"Evaluaciones(ID={self.ID}, arbitro_id={self.arbitro_id}, evaluador_id={self.evaluador_id}, partido_id={self.partido_id})"
 
 tipo_clase_mapping = {
     "Jugadores": Jugadores,

@@ -203,24 +203,33 @@ def create_evaluacion(db: Session, Evaluacion: EvaluacionesBase):
 
 from sqlalchemy import or_
 
-def actualizar_evaluacion_id(db: Session, partido_id: int, arbitro_id: int, created_evaluacion: int):
-    # Consultar el registro más reciente en arbitros_partidos que coincida con el arbitro_id proporcionado
-    latest_record = db.query(Arbitro_asignacion_Partido).filter(
-        (Arbitro_asignacion_Partido.partido_id == partido_id) &
-        (
-            (Arbitro_asignacion_Partido.arbitro_1_id == arbitro_id) |
-            (Arbitro_asignacion_Partido.arbitro_2_id == arbitro_id) |
-            (Arbitro_asignacion_Partido.arbitro_3_id == arbitro_id) |
-            (Arbitro_asignacion_Partido.arbitro_4_id == arbitro_id)
-        )
-    ).order_by(desc(Arbitro_asignacion_Partido.id)).first()
-    
-    # Verificar si se encontró un registro
-    if latest_record:
-        # Actualizar el campo evaluacion_id en el registro encontrado
-        latest_record.evaluacion_id = created_evaluacion
-        print(latest_record)
-        db.commit()
+from sqlalchemy import desc
 
+def actualizar_evaluacion_id(db: Session, partido_id: int, arbitro_id: int, created_evaluacion_id: int):
+    # Obtener la evaluación recién creada
+    nueva_evaluacion = db.query(Evaluaciones).filter_by(ID=created_evaluacion_id).first()
 
+    # Verificar si se encontró la evaluación
+    if nueva_evaluacion:
+        # Verificar si los IDs de partido y árbitro coinciden con los de la evaluación
+        if nueva_evaluacion.partido_id != partido_id or nueva_evaluacion.arbitro_id != arbitro_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Los IDs de partido y árbitro no coinciden con la evaluación creada")
 
+        # Consultar el registro más reciente en arbitros_partidos que coincida con el arbitro_id proporcionado
+        latest_record = db.query(Arbitro_asignacion_Partido).filter(
+            (Arbitro_asignacion_Partido.partido_id == partido_id) &
+            (
+                (Arbitro_asignacion_Partido.arbitro_1_id == arbitro_id) |
+                (Arbitro_asignacion_Partido.arbitro_2_id == arbitro_id) |
+                (Arbitro_asignacion_Partido.arbitro_3_id == arbitro_id) |
+                (Arbitro_asignacion_Partido.arbitro_4_id == arbitro_id)
+            )
+        ).order_by(desc(Arbitro_asignacion_Partido.id)).first()
+        
+        # Verificar si se encontró un registro
+        if latest_record:
+            # Actualizar el campo evaluacion_id en el registro encontrado
+            latest_record.evaluacion_id = created_evaluacion_id
+            db.commit()
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró la evaluación recién creada")

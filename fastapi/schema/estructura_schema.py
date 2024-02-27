@@ -16,7 +16,7 @@ class EvaluadoresBase(UserID):
     pass
 
 class EvaluacionesBase(BaseModel):
-    ID: int
+    
     arbitro_id: int
     evaluador_id: int
     partido_id: int
@@ -38,6 +38,9 @@ class EvaluacionesBase(BaseModel):
     faltasNaturalezaI: int
     faltasTacticasI: int
 
+
+class evaluaciones_schema(EvaluacionesBase):
+    ID: int
 class Arbitros(ArbitrosBase):
     ID: int
 

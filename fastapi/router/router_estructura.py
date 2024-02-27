@@ -109,12 +109,13 @@ async def create_evaluacion_arbitro(evaluacion_data: EvaluacionesBase, db: Sessi
         db=db,
         partido_id=evaluacion_data.partido_id,
         arbitro_id=evaluacion_data.arbitro_id,
-        created_evaluacion=created_evaluacion.ID, 
-        # Agregar este argumento
+        created_evaluacion_id=created_evaluacion.ID
     )
-    print(created_evaluacion)
     
     # Retornar la evaluación creada
     return created_evaluacion
+
+
+
 
 

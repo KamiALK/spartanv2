@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from model.Userdb import Partido
 from schema.estructura_schema import EvaluacionesBase, PartidoBase, EquipoSchema, CampeonatoSchema,Campeonato,partido_arbitro_scheme, arbitro_asignacion_scheme
 from sqlalchemy import event
+from sqlalchemy import or_
+from sqlalchemy import desc
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Partidos    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -183,6 +185,10 @@ def actualizar_evaluacion_id(connection, target):
 
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    evaluaciones    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def buscar_evaluacion_id(db: Session, id: int)-> Evaluaciones:                       
+    evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.ID == id).first()
+    return evaluacion
+
 
 def create_evaluacion(db: Session, Evaluacion: EvaluacionesBase):
     # Verificar si ya existe una evaluación para el partido proporcionado
@@ -191,6 +197,7 @@ def create_evaluacion(db: Session, Evaluacion: EvaluacionesBase):
         return None  # Ya existe una evaluación para este partido
     
     # Si no existe, creamos una nueva instancia de Evaluaciones
+    #se convierte el objeto a diccionario
     db_evaluacion = Evaluaciones(**Evaluacion.model_dump())
     
     # Agregamos y confirmamos los cambios en la base de datos
@@ -199,12 +206,6 @@ def create_evaluacion(db: Session, Evaluacion: EvaluacionesBase):
     
     # Retornamos la evaluación creada
     return db_evaluacion
-
-
-from sqlalchemy import or_
-
-from sqlalchemy import desc
-
 def actualizar_evaluacion_id(db: Session, partido_id: int, arbitro_id: int, created_evaluacion_id: int):
     # Obtener la evaluación recién creada
     nueva_evaluacion = db.query(Evaluaciones).filter_by(ID=created_evaluacion_id).first()
@@ -233,3 +234,21 @@ def actualizar_evaluacion_id(db: Session, partido_id: int, arbitro_id: int, crea
             db.commit()
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró la evaluación recién creada")
+
+def buscar_partidos_evaluados(db: Session,  arbitro_id: int):
+    partidos_arbitrados_arbitro  = db.query(Arbitro_asignacion_Partido).filter(
+        (
+            (Arbitro_asignacion_Partido.arbitro_1_id == arbitro_id) |
+            (Arbitro_asignacion_Partido.arbitro_2_id == arbitro_id) |
+            (Arbitro_asignacion_Partido.arbitro_3_id == arbitro_id) |
+            (Arbitro_asignacion_Partido.arbitro_4_id == arbitro_id)
+        )
+    ).order_by(desc(Arbitro_asignacion_Partido.id)).all()
+    
+    if partidos_arbitrados_arbitro:
+        return partidos_arbitrados_arbitro
+    else:
+        # Manejo de error si el tipo de usuario no existe
+        return []
+    
+            

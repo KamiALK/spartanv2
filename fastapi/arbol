@@ -8,9 +8,12 @@
 │   └── __pycache__
 │       ├── conection.cpython-311.pyc
 │       └── __init__.cpython-311.pyc
+├── dockerfile
 ├── main.py
 ├── model
+│   ├── Get_DB.py
 │   ├── __pycache__
+│   │   ├── Get_DB.cpython-311.pyc
 │   │   └── Userdb.cpython-311.pyc
 │   └── Userdb.py
 ├── package-lock.json
@@ -19,24 +22,57 @@
 ├── requirements.txt
 ├── router
 │   ├── crud.py
+│   ├── functions_structuctura.py
 │   ├── __init__.py
 │   ├── __pycache__
 │   │   ├── crud.cpython-311.pyc
+│   │   ├── estructura_functions.cpython-311.pyc
+│   │   ├── functions_structuctura.cpython-311.pyc
 │   │   ├── __init__.cpython-311.pyc
+│   │   ├── partidos.cpython-311.pyc
+│   │   ├── partidos_functions.cpython-311.pyc
+│   │   ├── router_estructura.cpython-311.pyc
+│   │   ├── router_partido.cpython-311.pyc
 │   │   └── routerPRUEBA.cpython-311.pyc
+│   ├── router_estructura.py
 │   └── routerPRUEBA.py
 ├── schema
+│   ├── estructura_schema.py
 │   ├── __init__.py
 │   ├── __pycache__
+│   │   ├── estructura_schema.cpython-311.pyc
 │   │   ├── __init__.cpython-311.pyc
+│   │   ├── partido_campeonato.cpython-311.pyc
 │   │   └── user_schema.cpython-311.pyc
 │   └── user_schema.py
+├── static
+│   └── imagenes
+│       ├── arbitro.png
+│       ├── evaluador.png
+│       ├── footer_script.js
+│       ├── jugador.png
+│       ├── mico.png
+│       ├── social-media-2083456_1280.png
+│       ├── todas.png
+│       └── whatsapp.png
 └── templates
     ├── components
     │   ├── footer.html
     │   ├── header.html
-    │   └── layout.html
+    │   ├── layout.html
+    │   └── section.html
+    ├── dash.html
     ├── index.html
-    ├── login.html
-    ├── signup.html
+    ├── lista_filter_cedula.html
+    ├── lista_filter_id.html
+    ├── lista.html
+    ├── registro.html
     └── user.html
+
+
+DB_NAME=JUGADORES
+DB_HOST=192.168.20.24
+DB_DIALECT=mysql
+DB_PASSWORD=123
+DB_USER=kamilo
+DB_PORT=3306

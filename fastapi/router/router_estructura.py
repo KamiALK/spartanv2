@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from  sqlalchemy.orm import Session
 from model.Get_DB import get_db
 import router.functions_structuctura as function
+from fastapi import FastAPI, HTTPException
+import requests
 
 db:Session = Depends(get_db)
 
@@ -65,6 +67,19 @@ async def update_partido_evaluador(partido_evaluador_data: partido_arbitro_schem
     return updated_partido
 
 
+@router.get("/partidos_asignados_arbitro")
+async def get_partidos_evaluados(id: int, db=Depends(get_db)):
+    return function.buscar_partidos_evaluados(db=db, arbitro_id=id)
+
+@router.get("/mostrar_evaluacion")
+async def mostrar_evaluacion(id: int, db=Depends(get_db)):
+    return function.buscar_evaluacion_id(db=db, id=id)
+
+
+
+
+
+
 
 
 
@@ -115,7 +130,28 @@ async def create_evaluacion_arbitro(evaluacion_data: EvaluacionesBase, db: Sessi
     # Retornar la evaluación creada
     return created_evaluacion
 
+#!~~~~~~~~~~~~~~~~~~~~~~    enviar evaluacion api   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+@router.get("/enviar_evaluacion_api")
+async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
+    return function.buscar_evaluacion_id(db=db, id=id)
 
 
 
-
+@router.post("/webhook")
+async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
+    data = function.buscar_evaluacion_id(db=db, id=id)
+    data_dict = data.__dict__
+    print(data_dict)
+    try:
+        
+        response = requests.post("http://localhost:8080/obtener_data", json=data_dict)
+        response.raise_for_status()  # Esto generará una excepción si la solicitud falla
+        return response
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Error al enviar la solicitud a la segunda API: {str(e)}"}
+    
+@router.get("/mostrar_evaluacion")
+async def mostrar_evaluacion(id: int, db=Depends(get_db)):
+    return function.buscar_evaluacion_id(db=db, id=id)
+    

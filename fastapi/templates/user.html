@@ -1,23 +1,18 @@
-{% extends "components/layout.html" %} {% block title %}Profile{% endblock %} {%
-block content %}
-<div class="row m-sm-5 m-3">
-  <h1 class="col">bienvenido</h1>
-</div>
 
-<div class="row justify-content-center">
-  <div class="card col-5">
-    <div class="card-body">
-      <h5 class="card-title">Hi <mark>{{ current_user.username }}</mark></h5>
-      <p class="card-text">This is a list with your data.</p>
-    </div>
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">Firstname: <mark>{{ current_user.nombre }}</mark></li>
-      <li class="list-group-item">Lastname: <mark>{{ current_user.apellido }}</mark></li>
-      <li class="list-group-item">Email: <mark>{{ current_user.email }}</mark></li>
-      <!-- Add more fields as needed -->
-    </ul>
-  </div>
-</div>
+{% extends "components/layout.html" %} 
+{% block title %}Profile{% endblock %} 
+
+
+
+
+
+{%block content %}
+<!-- lista horizontal menu -->
+{% include "components/horizontal.html" %}
+
+<!-- informacion de mi usuario -->
+{% include "components/mi_data.html" %}
+
 
 
 {% endblock %}

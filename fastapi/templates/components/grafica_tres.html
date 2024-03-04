@@ -1,0 +1,44 @@
+
+{% block grafica_tres %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Control de juego</h5>
+                    <p class="card-text">{{ data.observacionesCDJ }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Estado Fisico</h5>
+                    <p class="card-text">{{ data.observacionesEF }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"> Desplazamiento </h5>
+                    <p class="card-text">{{ data.observacionesD }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"> Lectura de juego </h5>
+                    <p class="card-text">{{ data.observacionesL }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+

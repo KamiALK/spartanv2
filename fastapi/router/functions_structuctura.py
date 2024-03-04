@@ -186,11 +186,12 @@ def actualizar_evaluacion_id(connection, target):
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    evaluaciones    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def buscar_evaluacion_id(db: Session, id: int)-> Evaluaciones:                       
-    evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.ID == id).first()
+    evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.arbitro_id == id).order_by(desc(Evaluaciones.ID)).first()
     # dict_evaluacion = Evaluaciones(**evaluacion.dict())
     return evaluacion
-def buscar_all_evaluaciones(db: Session, id: int)-> Evaluaciones:                       
-    evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.ID == id).all()
+def buscar_all_evaluaciones(db: Session, id: int)-> Evaluaciones:  
+    evaluacion = db.query(Evaluaciones).filter_by(arbitro_id=Evaluaciones.arbitro_id == id).order_by(desc(Evaluaciones.ID)).all()                  
+    # evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.ID == id).all()
     # dict_evaluacion = Evaluaciones(**evaluacion.dict())
     return evaluacion
 

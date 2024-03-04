@@ -1,0 +1,19 @@
+descargar el fichero git 
+
+correr el docker-compose up con el contenedor de base de datos
+
+problemas:
+    -al tener linux tuve que instalar otras dependencias estando fuera del entorno virtual lo pide docker 
+    sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+    
+    -el contenedor de docker con mysql el socker no permite conexiones externas que no esten en la misma red
+     docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' db
+     inspecciono el puerto del contenedor que esta arriba para configurar corectamente el .env
+
+DB_NAME=<como se llame>
+DB_HOST=172.19.0.2 de ejemplo mira primero con el comando docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' db
+DB_DIALECT=mysql
+DB_PASSWORD=<la contrasena>
+DB_USER=root
+DB_PORT=3306
+    

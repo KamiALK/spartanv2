@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from dotenv import load_dotenv
 import os
-from model.Userdb import Base#todo lo referente a la base de datos
+from model.Userdb import Base
 load_dotenv()
 DB_NAME =os.getenv("DB_NAME") 
 DB_HOST = os.getenv("DB_HOST")

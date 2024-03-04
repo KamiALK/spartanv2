@@ -1,0 +1,55 @@
+{% block grafica_dos %}
+<div>
+<title>Chart</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</div>
+<canvas id="myChart2" style="width: 60%; margin: auto;"></canvas>
+<script>
+const ctx2 = document.getElementById('myChart2').getContext('2d');
+const myChart2 = new Chart(ctx2, {
+type: 'radar',
+data: {
+labels: ['Situaciones Reales', 'Faltas Naturaleza', 'Faltas Tacticas'],
+datasets: [
+{
+label: 'Inspector',
+data: [
+{{ data.situacionesRealesI }},
+{{ data.faltasNaturalezaI }},
+{{ data.faltasTacticasI }}
+],
+backgroundColor: 'rgba(255, 99, 132, 0.2)',
+borderColor: 'rgba(255, 99, 132, 1)',
+pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+pointBorderColor: '#fff',
+pointHoverBackgroundColor: '#fff',
+pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+},
+{
+label: 'Arbitro',
+data: [
+{{ data.situacionesRealesA }},
+{{ data.faltasNaturalezaA }},
+{{ data.faltasTacticasA }}
+],
+backgroundColor: 'rgba(54, 162, 235, 0.2)',
+borderColor: 'rgba(54, 162, 235, 1)',
+pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+pointBorderColor: '#fff',
+pointHoverBackgroundColor: '#fff',
+pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+}
+]
+},
+options: {
+scales: {
+r: {
+beginAtZero: true
+}
+}
+}
+});
+</script>
+{% endblock %}
+
+

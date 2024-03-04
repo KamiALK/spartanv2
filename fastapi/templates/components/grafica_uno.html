@@ -1,0 +1,57 @@
+{% block grafica_uno %}
+<div>
+<title>Chart</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</div>
+<canvas id="myChart" style="width: 70%; margin: auto;"></canvas>
+<script>
+const ctx = document.getElementById('myChart').getContext('2d');
+
+// Datos
+const dataValues = [
+    {{ data.estadofisico }},
+    {{ data.desplazamiento }},
+    {{ data.lectura_de_juego }},
+    {{ data.control_de_juego }},
+    {{ data.nivelDificultadTorneo }},
+    {{ data.DificultadEtapaTorneo }},
+    {{ data.temperaturaEquipos }}
+];
+
+// Generar colores
+const backgroundColors = dataValues.map(value => {
+    if (value > 5) return 'rgba(75, 192, 192, 0.2)';  // Verde
+    if (value == 5) return 'rgba(255, 206, 86, 0.2)';  // Amarillo
+    return 'rgba(255, 99, 132, 0.2)';  // Rojo
+});
+const borderColors = dataValues.map(value => {
+    if (value > 5) return 'rgba(75, 192, 192, 1)';  // Verde
+    if (value == 5) return 'rgba(255, 206, 86, 1)';  // Amarillo
+    return 'rgba(255, 99, 132, 1)';  // Rojo
+});
+
+const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Estado Físico', 'Desplazamiento', 'Lectura de Juego', 'Control de Juego', 'Nivel de Dificultad de Torneo', 'Temperatura de Equipos'],
+        datasets: [{
+            label: 'Evaluaciones',
+            data: dataValues,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+
+

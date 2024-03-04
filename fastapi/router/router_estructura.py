@@ -177,12 +177,24 @@ async def grafica(
         
         # Renderizar la plantilla con los datos
         data = {
-            "estadofisico": int(evaluaciones.estado_fisico),
-            "desplazamiento": int(evaluaciones.desplazamiento),
-            "lectura_de_juego": int(evaluaciones.lectura_de_juego),
-            "control_de_juego": int(evaluaciones.control_de_juego),
-            "nivelDificultadTorneo":int(evaluaciones.nivelDificultadTorneo),
-            "temperaturaEquipos": int(evaluaciones.temperaturaEquipos)
+            "estadofisico": evaluaciones.estado_fisico,
+            "desplazamiento": evaluaciones.desplazamiento,
+            "lectura_de_juego": evaluaciones.lectura_de_juego,
+            "control_de_juego": evaluaciones.control_de_juego,
+            "nivelDificultadTorneo":evaluaciones.nivelDificultadTorneo,
+            "DificultadEtapaTorneo":evaluaciones.DificultadEtapaTorneo,
+            "temperaturaEquipos": evaluaciones.temperaturaEquipos,
+            
+            "situacionesRealesA": evaluaciones.situacionesRealesA,
+            "faltasNaturalezaA": evaluaciones.faltasNaturalezaA,
+            "faltasTacticasA": evaluaciones.faltasTacticasA,
+            
+            "situacionesRealesI": evaluaciones.situacionesRealesI,
+            "faltasNaturalezaI": evaluaciones.faltasNaturalezaI,
+            "faltasTacticasI": evaluaciones.faltasTacticasI,
+            
+            
+            
         }
         
         return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
@@ -193,7 +205,11 @@ async def grafica(
             "lectura_de_juego": None,
             "control_de_juego": None,
             "nivelDificultadTorneo": None,
-            "temperaturaEquipos": None
+            "temperaturaEquipos": None,
+            
+            
+            
+            
         }
     return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
 
@@ -201,15 +217,5 @@ async def grafica(
 
 
 
-@router.get("/users/me/evaluaciones/grafica/", response_class=HTMLResponse)
-async def read_item(request: Request):
-    data = {
-        "estadofisico": 0,
-        "desplazamiento": 20,
-        "lectura_de_juego": 30,
-        "control_de_juego": 40,
-        "nivelDificultadTorneo": 50,
-        "temperaturaEquipos": 60
-    }
-    return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
+
 

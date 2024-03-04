@@ -17,10 +17,8 @@ from fastapi.responses import RedirectResponse
 from fastapi import Path
 from fastapi import Query
 import router.router_estructura as partido_router
+import os
 
-# from model.Get_DB import get_db
-
-# db:Session = Depends(get_db)
 
 # aqui la configuracion de archivos jin2
 appi =FastAPI()
@@ -161,6 +159,8 @@ async def login_access_token(
     response.set_cookie(key="token", value=token_data['access_token'], domain="localhost", path="/")
     response.set_cookie(key="token_type", value=token_type, domain="localhost", path="/")
 
+    #estoy intentanto inyectar el id para poder maniobrar en toda la pagina
+    # response.set_cookie(key="ID", value=str(token_data['ID']), domain="localhost", path="/")
     return response
 
 
@@ -169,56 +169,12 @@ async def login_access_token(
 async def read_users_me(request: Request, db=Depends(get_db),
                         current_user: dict = Depends(router.crud.get_current_user)):
     try:
-        print(current_user) 
-
+     
+        
         return templates.TemplateResponse("user.html", {"request": request, "current_user": current_user})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
-
-
-#!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    LOGOUT   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@appi.get("/logout")
-async def logout(request: Request):
-    response = RedirectResponse(url="/", status_code=302)
-    response.delete_cookie(key="token")
-    response.delete_cookie(key="token_type")
-    return response
-
-
-
-from fastapi import FastAPI, HTTPException
-import requests
-
-app = FastAPI()
-
-@app.get("/grafica")
-async def obtener_grafica():
-    #esta funcion le envia el id a la api que va a generar el grafico la api de el puerto 80  
-    # Hacer una solicitud GET a la API en el puerto 8080 para obtener la gráfica
-    
-    try:
-        response = requests.post("http://localhost:8080/obtener_id")
-        response = requests.get("http://localhost:8080/obtener_grafica")
-        response.raise_for_status()  # Lanza una excepción si la solicitud no fue exitosa
-        grafica = response.content  # Obtener el contenido de la respuesta (la imagen de la gráfica)
-    except requests.RequestException as e:
-        raise HTTPException(status_code=500, detail="Error al obtener la gráfica de la API en el puerto 8080")
-
-    # Renderizar el HTML con la gráfica insertada
-    html_con_grafica = f"""
-    <html>
-    <head>
-        <title>Gráfica</title>
-    </head>
-    <body>
-        <h1>Gráfica</h1>
-        <img src="data:image/png;base64,{grafica.decode('utf-8')}" alt="Gráfica generada">
-    </body>
-    </html>
-    """
-
-    return HTMLResponse(content=html_con_grafica, status_code=200)
 
 
 

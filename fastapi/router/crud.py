@@ -22,8 +22,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-# def get_users(db):
-#     return db.query(Jugadores).all()
 def get_users(db, tipo: str):
     clase_usuario = tipo_clase_mapping.get(tipo)
     if clase_usuario:
@@ -31,6 +29,7 @@ def get_users(db, tipo: str):
     else:
         # Manejo de error si el tipo de usuario no existe
         return []
+
 
 def get_user_by_email(db, username: str, tipo: str)->UserID:
     clase_usuario = tipo_clase_mapping.get(tipo)
@@ -160,6 +159,7 @@ def login_for_access_token(
     access_token = create_access_token(
         db, data={
             "sub": user.username,
+            "id": user.ID,
             "nombre": user.nombre,
             "apellido": user.apellido,
             "email":user.email,
@@ -192,6 +192,7 @@ def get_current_user(token: Optional[str] = Cookie(None)):
         
         user_info = {
             "username": username,
+            "ID": payload.get("id"),
             "nombre": payload.get("nombre"),
             "apellido": payload.get("apellido"),
             "email": payload.get("email"),
@@ -202,28 +203,6 @@ def get_current_user(token: Optional[str] = Cookie(None)):
     
     except JWTError:
         raise credentials_exception
-
-
-# def read_users_me(db: session,
-#     current_user: Annotated[Userdb, Depends(get_current_user)]
-# ):
-#     return current_user
-
-
-
-# def read_own_items(db: session,
-#     current_user: Annotated[Userdb, Depends(get_current_user)]
-# ):
-#     return [{"item_id": "Foo", "owner": current_user.username}]
-
-# from typing import Dict
-
-# def get_current_active_user(db: session,
-#     current_user: Annotated[Usernopass, Depends(get_current_user)]
-# ):
-
-#     return current_user
-
 
 
 

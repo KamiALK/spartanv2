@@ -1,3 +1,5 @@
+
+
 from model.Userdb import Evaluaciones
 from schema.estructura_schema import EquipoSchema, EvaluacionesBase,PartidoBase,CampeonatoSchema, partido_arbitro_scheme,arbitro_asignacion_scheme
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,14 +7,24 @@ from  sqlalchemy.orm import Session
 from model.Get_DB import get_db
 import router.functions_structuctura as function
 from fastapi import FastAPI, HTTPException
+from fastapi.templating import Jinja2Templates
 import requests
+from fastapi import  Request, Depends,HTTPException, status
+from  sqlalchemy.orm import Session
+import router.crud as functio
+from fastapi.responses import HTMLResponse
+from fastapi import Request
+import os
+
+
+
 
 db:Session = Depends(get_db)
 
 
 router = APIRouter()
 
-
+templates = Jinja2Templates(directory="templates")
 
 
 
@@ -138,20 +150,66 @@ async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
 
 
 
-@router.post("/webhook")
-async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
-    data = function.buscar_evaluacion_id(db=db, id=id)
-    data_dict = data.__dict__
-    print(data_dict)
-    try:
-        
-        response = requests.post("http://localhost:8080/obtener_data", json=data_dict)
-        response.raise_for_status()  # Esto generará una excepción si la solicitud falla
-        return response
-    except requests.exceptions.RequestException as e:
-        return {"error": f"Error al enviar la solicitud a la segunda API: {str(e)}"}
+
     
 @router.get("/mostrar_evaluacion")
 async def mostrar_evaluacion(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
     
+
+from fastapi import Cookie
+
+@router.get("/users/me/evaluaciones/grafica/")
+async def grafica(
+    request: Request,
+    db=Depends(get_db),
+    token: str = Cookie(None) # Obtén el token de la cookie
+):
+    if token is None:
+        raise HTTPException(status_code=401, detail="Token not found in cookie")
+    try:
+        #obtiene el usuario
+        id1= functio.get_current_user( token=token)
+        # Alamcena el id del usuario
+        number_id = int(id1["ID"])
+        #obtengo la evaluacion
+        evaluaciones:Evaluaciones = function.buscar_evaluacion_id(db=db, id=number_id)
+        
+        # Renderizar la plantilla con los datos
+        data = {
+            "estadofisico": int(evaluaciones.estado_fisico),
+            "desplazamiento": int(evaluaciones.desplazamiento),
+            "lectura_de_juego": int(evaluaciones.lectura_de_juego),
+            "control_de_juego": int(evaluaciones.control_de_juego),
+            "nivelDificultadTorneo":int(evaluaciones.nivelDificultadTorneo),
+            "temperaturaEquipos": int(evaluaciones.temperaturaEquipos)
+        }
+        
+        return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
+    except:
+        data = {
+            "estadofisico": None,
+            "desplazamiento": None,
+            "lectura_de_juego": None,
+            "control_de_juego": None,
+            "nivelDificultadTorneo": None,
+            "temperaturaEquipos": None
+        }
+    return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
+
+        
+
+
+
+@router.get("/users/me/evaluaciones/grafica/", response_class=HTMLResponse)
+async def read_item(request: Request):
+    data = {
+        "estadofisico": 0,
+        "desplazamiento": 20,
+        "lectura_de_juego": 30,
+        "control_de_juego": 40,
+        "nivelDificultadTorneo": 50,
+        "temperaturaEquipos": 60
+    }
+    return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
+

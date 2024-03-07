@@ -1,12 +1,12 @@
+
 {% extends "components/layout.html" %} 
 {% block title %}Profile{% endblock %} 
 
-{% block content %}
-
-
-
+{%block content %}
+<!-- lista horizontal menu -->
 
 {% include "components/vertical.html" %}
+
 <div class="container">
     <!-- Contenido del pie de página -->
     <div class="footer-row" style="display: flex;margin: 0;">
@@ -25,11 +25,17 @@
     <!-- Contenedor de Explora -->
         <div class="col-12 col-sm-12 col-md-12 col-lg-18 col-xl-18" style="font-size: 14px;">
             {% include "components/horizontal.html" %}
-             {% include "components/mi_data.html" %}
+
+             {% include "components/lista_partidos_asignados.html" %}
         </div>
     </div>
 
   </div>
+
+
+
+
+
+
+
 {% endblock %}
-
-

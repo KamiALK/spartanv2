@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import Depends,  HTTPException, Query, status
 from typing import Optional
 from fastapi import Cookie
@@ -41,7 +41,16 @@ def get_partido_by_equipo(db: Session, equipo_nombre: str, partido: PartidoBase)
     return None
 
 
-
+def get_partidos_by_id_partido(db, id_partido: int):
+    # Utilizar el id_campeonato en la consulta
+    partidos_encontrados: List[Partido] = db.query(Partido).filter(Partido.ID == id_partido).all()
+    
+    if partidos_encontrados:
+        # Retornar todos los partidos encontrados
+        return partidos_encontrados
+    
+    # Si no se encontraron partidos, retornar una lista vacía
+    return []
 
 
 
@@ -80,6 +89,15 @@ def create_partido(db: Session, partido: PartidoBase):
 
 def get_equipos_all(db: Session):
     return db.query(Equipo).all()
+def get_equipo_by_id_equipo(db, id_partido: int):
+    # Utilizar el id_equipo en la consulta
+    equipos_encontrados = db.query(Equipo).filter(Equipo.ID == id_partido).first()
+    
+    if equipos_encontrados:
+        # Retornar todos los equipos encontrados
+        return equipos_encontrados.nombre
+    # Si no se encontraron equipos, retornar una lista vacía
+    return []
 
 
 
@@ -124,7 +142,6 @@ def create_campeonato(db: Session, campeonato: CampeonatoSchema):
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    gestiones asignacion arbitros    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ahora tenemos q ue reguistra los partidos que pitan los arbitros
-
 
 
 def asignar_arbitro_a_partido(db: Session, partido_arbitro_data: arbitro_asignacion_scheme):
@@ -256,5 +273,23 @@ def buscar_partidos_evaluados(db: Session,  arbitro_id: int):
     else:
         # Manejo de error si el tipo de usuario no existe
         return []
+    
+def buscar_partidos_asignados(db: Session,  arbitro_id: int):
+    partidos_arbitrados_arbitro  = db.query(Arbitro_asignacion_Partido).filter(
+        (
+            (Arbitro_asignacion_Partido.arbitro_1_id == arbitro_id) |
+            (Arbitro_asignacion_Partido.arbitro_2_id == arbitro_id) |
+            (Arbitro_asignacion_Partido.arbitro_3_id == arbitro_id) |
+            (Arbitro_asignacion_Partido.arbitro_4_id == arbitro_id)
+        )
+    ).order_by(desc(Arbitro_asignacion_Partido.id)).all()
+    
+    if partidos_arbitrados_arbitro:
+        return partidos_arbitrados_arbitro
+    else:
+        # Manejo de error si el tipo de usuario no existe
+        return []
+def buscar_all_asignaciones(db: Session)->partido_arbitro_scheme:
+    return db.query(Arbitro_asignacion_Partido).all()
     
             

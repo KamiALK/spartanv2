@@ -1,5 +1,6 @@
 
 
+from typing import Any, Dict, List
 from model.Userdb import Evaluaciones
 from schema.estructura_schema import EquipoSchema, EvaluacionesBase,PartidoBase,CampeonatoSchema, partido_arbitro_scheme,arbitro_asignacion_scheme
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,6 +16,7 @@ import router.crud as functio
 from fastapi.responses import HTMLResponse
 from fastapi import Request
 import os
+from fastapi import Cookie
 
 
 
@@ -56,7 +58,7 @@ async def buscar_partidos_by_id_campeonato(id_campeonato: int,  db: Session = De
 
 
 
-@router.post("/partidos/arbitro/create")
+@router.post("/partidos/create")
 async def create_partido(partido: PartidoBase, db=Depends(get_db)):
     created_partido = function.create_partido(db=db, partido=partido)
     
@@ -69,17 +71,62 @@ async def create_partido(partido: PartidoBase, db=Depends(get_db)):
 #el arbitro tiene que registrar su partido e informar el partido 
 from fastapi import HTTPException, status
 
-@router.post("/partidos/evaluacion/update")
-async def update_partido_evaluador(partido_evaluador_data: partido_arbitro_scheme, db: Session = Depends(get_db)):
+@router.post("/partidos/asignacion")
+async def asignacion_arbitro_partido(partido_evaluador_data: partido_arbitro_scheme, db: Session = Depends(get_db)):
     try:
         updated_partido = function.asignar_arbitro_a_partido(db=db, partido_arbitro_data=partido_evaluador_data)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     return updated_partido
+@router.get("/obtener_asignaciones/me")
+async def obtener_partidos_asignados(
+    request: Request,
+    db=Depends(get_db),
+    token: str = Cookie(None) 
+):
+    if token is None:
+        raise HTTPException(status_code=401, detail="Token not found in cookie")
+    try:
+        #obtiene el usuario
+        id1= functio.get_current_user( token=token)
+        print(id1)
+        # Alamcena el id del usuario
+        number_id = int(id1["ID"])
+        
+        print(number_id)#obtengo los partidos asignados
+        partidos= function.get_partidos_asignados(db=db, id_user=number_id)
+        print(partidos)
+        return templates.TemplateResponse("user_asignaciones.html", {"request": request, "partidos": partidos})
+    except:
+
+        partidos= "no hay partidos"
+        return templates.TemplateResponse("user_asignaciones.html", {"request": request, "partidos": partidos})
+
+@router.get("/obtener_asignaciones")
+async def obtener_partidos_asignados(
+    request: Request,
+    db=Depends(get_db),
+    
+)-> List[Dict[str, Any]]:    
+    partidos: List[partido_arbitro_scheme]= function.buscar_all_asignaciones(db=db)
+    data = []
+    for partido in partidos:
+        partido_dict = {
+            "partido_id": partido.partido_id,
+            "arbitro_1_id": partido.arbitro_1_id,
+            "arbitro_2_id": partido.arbitro_2_id,
+            "arbitro_3_id": partido.arbitro_3_id,
+            "arbitro_4_id": partido.arbitro_4_id,
+        }
+        data.append(partido_dict)
+    
+ 
+    return templates.TemplateResponse("user_asignaciones.html", {"request": request, "partidos": data})
 
 
-@router.get("/partidos_asignados_arbitro")
+
+@router.get("/Obtener_partidos_evaluados")
 async def get_partidos_evaluados(id: int, db=Depends(get_db)):
     return function.buscar_partidos_evaluados(db=db, arbitro_id=id)
 
@@ -88,15 +135,67 @@ async def mostrar_evaluacion(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
 
 
+@router.get("/partidos_asignados")
+async def partidos_asignados(
+    request: Request,
+    db=Depends(get_db),
+    token: str = Cookie(None) # Obtén el token de la cookie
+):
+    if token is None:
+        raise HTTPException(status_code=401, detail="Token not found in cookie")
+    # try:
+        # Obtener el ID del usuario
+    id_persona = functio.get_current_user(token=token)
+    persona_id = int(id_persona["ID"])
+    
+    # Obtener los partidos asignados al usuario
+    partidos_asignados = function.buscar_partidos_asignados(db=db, arbitro_id=persona_id)
+    print("partidos asignados", partidos_asignados)
+    
+    # Obtener los detalles completos de los partidos asignados
+    partidos_detalles = []
 
+    for asignacion_partido in partidos_asignados:
+        partido_id = asignacion_partido.partido_id 
 
+        partido = function.get_partidos_by_id_partido(db=db, id_partido=partido_id)
+        
+        for p in partido:
+            # Convertir cada objeto Partido a un diccionario
+            partido_dict = p.__dict__
+            # Eliminar la clave "_sa_instance_state" que no es necesaria
+            partido_dict.pop('_sa_instance_state', None)
+            
+            # Obtener el nombre del equipo local y visitante
+            id_local = p.equipo_local_id
+            id_visitante =p.equipo_visitante_id
+            nombre_equipo_local = function.get_equipo_by_id_equipo(db=db, id_partido=id_local)
+            nombre_equipo_visitante = function.get_equipo_by_id_equipo(db=db, id_partido=id_visitante)
+            
+            # Agregar los nombres de los equipos al diccionario del partido
+            partido_dict['equipo_local'] = nombre_equipo_local
+            partido_dict['equipo_visitante'] = nombre_equipo_visitante
+            
+            partidos_detalles.append(partido_dict)
 
-
+    
+    if not partidos_detalles:    
+        raise HTTPException(status_code=404, detail="No hay partidos asignados")
+    
+    # Pasar los detalles de los partidos a la plantilla HTML
+    print("imprimiendo partido detalles", partidos_detalles)
+    return templates.TemplateResponse("user_partidos.html", {"request": request, "partidos": partidos_detalles})
+    # except:
+    #     partidos = "no hay partidos"
+    #     print(partidos)
+    #     return templates.TemplateResponse("user_partidos.html", {"request": request, "partidos": partidos})
 
 
 
 
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     equipo     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 @router.get("/get_equipos")
 async def get_equipos(db=Depends(get_db)):
     return  function.get_equipos_all(db=db)
@@ -157,7 +256,7 @@ async def mostrar_evaluacion(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
     
 
-from fastapi import Cookie
+
 
 @router.get("/users/me/evaluaciones/grafica/")
 async def grafica(

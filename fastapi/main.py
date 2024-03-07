@@ -83,11 +83,7 @@ async def get_users_all(request: Request,tipo: str = Path(...),db=Depends(get_db
     print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
     return templates.TemplateResponse("index.html", {"request": request, "tipo": tipo,  "usuarios": usuarios})
 
-@appi.get("/{tipo}/users")
-async def get_users_all(request: Request,tipo: str = Path(...),db=Depends(get_db)):
-    usuarios = router.crud.get_users(db=db,tipo=tipo)
-    print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
-    return usuarios
+
 
 @appi.get("/{tipo}/{id:int}", response_class=HTMLResponse)  # Cambia ID a id
 def get_user(request: Request, id, db=Depends(get_db), tipo: str = Path(...)):  # Cambia ID a id

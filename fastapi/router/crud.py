@@ -9,7 +9,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from typing import Optional
 from fastapi import Cookie
-from model.Userdb import tipo_clase_mapping 
+from model.Userdb import Arbitros, tipo_clase_mapping 
 
 
 
@@ -27,6 +27,14 @@ def get_users(db, tipo: str):
     if clase_usuario:
         return db.query(clase_usuario).all()
     else:
+        # Manejo de error si el tipo de usuario no existe
+        return []
+
+def get_arbitros(db,)->Arbitros:
+    
+    try:
+        return db.query(Arbitros).all()
+    except:
         # Manejo de error si el tipo de usuario no existe
         return []
 

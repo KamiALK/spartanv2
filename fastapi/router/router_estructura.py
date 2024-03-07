@@ -143,52 +143,52 @@ async def partidos_asignados(
 ):
     if token is None:
         raise HTTPException(status_code=401, detail="Token not found in cookie")
-    # try:
+    try:
         # Obtener el ID del usuario
-    id_persona = functio.get_current_user(token=token)
-    persona_id = int(id_persona["ID"])
-    
-    # Obtener los partidos asignados al usuario
-    partidos_asignados = function.buscar_partidos_asignados(db=db, arbitro_id=persona_id)
-    print("partidos asignados", partidos_asignados)
-    
-    # Obtener los detalles completos de los partidos asignados
-    partidos_detalles = []
-
-    for asignacion_partido in partidos_asignados:
-        partido_id = asignacion_partido.partido_id 
-
-        partido = function.get_partidos_by_id_partido(db=db, id_partido=partido_id)
+        id_persona = functio.get_current_user(token=token)
+        persona_id = int(id_persona["ID"])
         
-        for p in partido:
-            # Convertir cada objeto Partido a un diccionario
-            partido_dict = p.__dict__
-            # Eliminar la clave "_sa_instance_state" que no es necesaria
-            partido_dict.pop('_sa_instance_state', None)
-            
-            # Obtener el nombre del equipo local y visitante
-            id_local = p.equipo_local_id
-            id_visitante =p.equipo_visitante_id
-            nombre_equipo_local = function.get_equipo_by_id_equipo(db=db, id_partido=id_local)
-            nombre_equipo_visitante = function.get_equipo_by_id_equipo(db=db, id_partido=id_visitante)
-            
-            # Agregar los nombres de los equipos al diccionario del partido
-            partido_dict['equipo_local'] = nombre_equipo_local
-            partido_dict['equipo_visitante'] = nombre_equipo_visitante
-            
-            partidos_detalles.append(partido_dict)
+        # Obtener los partidos asignados al usuario
+        partidos_asignados = function.buscar_partidos_asignados(db=db, arbitro_id=persona_id)
+        # print("partidos asignados", partidos_asignados)
+        
+        # Obtener los detalles completos de los partidos asignados
+        partidos_detalles = []
 
-    
-    if not partidos_detalles:    
-        raise HTTPException(status_code=404, detail="No hay partidos asignados")
-    
-    # Pasar los detalles de los partidos a la plantilla HTML
-    print("imprimiendo partido detalles", partidos_detalles)
-    return templates.TemplateResponse("user_partidos.html", {"request": request, "partidos": partidos_detalles})
-    # except:
-    #     partidos = "no hay partidos"
-    #     print(partidos)
-    #     return templates.TemplateResponse("user_partidos.html", {"request": request, "partidos": partidos})
+        for asignacion_partido in partidos_asignados:
+            partido_id = asignacion_partido.partido_id 
+
+            partido = function.get_partidos_by_id_partido(db=db, id_partido=partido_id)
+            
+            for p in partido:
+                # Convertir cada objeto Partido a un diccionario
+                partido_dict = p.__dict__
+                # Eliminar la clave "_sa_instance_state" que no es necesaria
+                partido_dict.pop('_sa_instance_state', None)
+                
+                # Obtener el nombre del equipo local y visitante
+                id_local = p.equipo_local_id
+                id_visitante =p.equipo_visitante_id
+                nombre_equipo_local = function.get_equipo_by_id_equipo(db=db, id_partido=id_local)
+                nombre_equipo_visitante = function.get_equipo_by_id_equipo(db=db, id_partido=id_visitante)
+                
+                # Agregar los nombres de los equipos al diccionario del partido
+                partido_dict['equipo_local'] = nombre_equipo_local
+                partido_dict['equipo_visitante'] = nombre_equipo_visitante
+                
+                partidos_detalles.append(partido_dict)
+
+        
+        if not partidos_detalles:    
+            raise HTTPException(status_code=404, detail="No hay partidos asignados")
+        
+        # Pasar los detalles de los partidos a la plantilla HTML
+        # print("imprimiendo partido detalles", partidos_detalles)
+        return templates.TemplateResponse("user_partidos.html", {"request": request, "partidos": partidos_detalles})
+    except:
+        partidos = "no hay partidos"
+        # print(partidos)
+        return templates.TemplateResponse("user_partidos.html", {"request": request, "partidos": partidos})
 
 
 
@@ -247,16 +247,11 @@ async def create_evaluacion_arbitro(evaluacion_data: EvaluacionesBase, db: Sessi
 async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
 
-
-
-
     
 @router.get("/mostrar_evaluacion")
 async def mostrar_evaluacion(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
     
-
-
 
 @router.get("/users/me/evaluaciones/grafica/")
 async def grafica(

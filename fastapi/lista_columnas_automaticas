@@ -1,0 +1,26 @@
+<table>
+  <thead>
+      <tr>
+          {% if evaluaciones %}
+              {% for field in evaluaciones[0].keys() %}
+                  {% if field != '_sa_instance_state' %}  <!-- Excluir el campo _sa_instance_state -->
+                      <th>{{ field }}</th>
+                  {% endif %}
+              {% endfor %}
+          {% endif %}
+      </tr>
+  </thead>
+  <tbody>
+      {% if evaluaciones %}
+          {% for evaluacion in evaluaciones %}
+              <tr>
+                  {% for field, value in evaluacion.items() %}
+                      {% if field != '_sa_instance_state' %}  <!-- Excluir el campo _sa_instance_state -->
+                          <td>{{ value }}</td>
+                      {% endif %}
+                  {% endfor %}
+              </tr>
+          {% endfor %}
+      {% endif %}
+  </tbody>
+</table>

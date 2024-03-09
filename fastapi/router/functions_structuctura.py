@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated, Any, Dict, List
 from fastapi import Depends,  HTTPException, Query, status
 from typing import Optional
 from fastapi import Cookie
@@ -7,7 +7,7 @@ from model.Userdb import   Partido, Equipo,Jugadores,Campeonato,Arbitro_asignaci
 from sqlalchemy import DateTime, desc
 from sqlalchemy.orm import Session
 from model.Userdb import Partido
-from schema.estructura_schema import EvaluacionesBase, PartidoBase, EquipoSchema, CampeonatoSchema,Campeonato,partido_arbitro_scheme, arbitro_asignacion_scheme
+from schema.estructura_schema import EvaluacionesBase, PartidoBase,evaluaciones_schema, EquipoSchema, CampeonatoSchema,Campeonato,partido_arbitro_scheme, arbitro_asignacion_scheme
 from sqlalchemy import event
 from sqlalchemy import or_
 from sqlalchemy import desc
@@ -211,15 +211,30 @@ def actualizar_evaluacion_id(connection, target):
 
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    evaluaciones    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def buscar_evaluacion_id(db: Session, id: int)-> Evaluaciones:                       
+def buscar_evaluacion_id_arbitro(db: Session, id: int)-> Evaluaciones:                       
     evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.arbitro_id == id).order_by(desc(Evaluaciones.ID)).first()
     # dict_evaluacion = Evaluaciones(**evaluacion.dict())
     return evaluacion
-def buscar_all_evaluaciones(db: Session, id: int)-> Evaluaciones:  
-    evaluacion = db.query(Evaluaciones).filter_by(arbitro_id=Evaluaciones.arbitro_id == id).order_by(desc(Evaluaciones.ID)).all()                  
-    # evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.ID == id).all()
+
+def buscar_evaluacion_id_evaluacion(db: Session, id: int)-> Evaluaciones:                       
+    evaluacion: Evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.ID == id).order_by(desc(Evaluaciones.ID)).first()
     # dict_evaluacion = Evaluaciones(**evaluacion.dict())
     return evaluacion
+def buscar_all_evaluaciones(db: Session, id: int) -> List[Dict[str, Any]]:
+    evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.evaluador_id == id).order_by(desc(Evaluaciones.ID)).all()
+    
+    # Convertir objetos JSON a diccionarios
+    evaluaciones_dicts = [evaluacion.__dict__ for evaluacion in evaluaciones]
+
+    return evaluaciones_dicts if evaluaciones_dicts else []
+def buscar_all_evaluaciones_arbitro(db: Session, id: int) -> List[Dict[str, Any]]:
+    evaluaciones = db.query(Evaluaciones).filter(Evaluaciones.arbitro_id == id).order_by(desc(Evaluaciones.ID)).all()
+    
+    # Convertir objetos JSON a diccionarios
+    evaluaciones_dicts = [evaluacion.__dict__ for evaluacion in evaluaciones]
+
+    return evaluaciones_dicts if evaluaciones_dicts else []
+
 
 
 def create_evaluacion(db: Session, Evaluacion: EvaluacionesBase):

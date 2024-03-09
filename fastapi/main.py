@@ -145,7 +145,7 @@ async def login_access_token(
     tipo: str = Form(...),  # Agrega el parámetro tipo
     db = Depends(get_db)
 ):
-    print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
+    # print("Valor de tipo antes de llamar a get_user_by_email:", tipo)
     token_data = login_for_access_token(form_data=form_data, db=db, tipo=tipo)  # Pasa el tipo al método de autenticación
     token_type = token_data['token_type']
     if not token_data:
@@ -165,9 +165,15 @@ async def login_access_token(
 async def read_users_me(request: Request, db=Depends(get_db),
                         current_user: dict = Depends(router.crud.get_current_user)):
     try:
-     
+        if current_user["tipo"] == "admin":
+            return templates.TemplateResponse("admin.html", {"request": request, "current_user": current_user})
+        elif current_user["tipo"] == "Arbitros":
+            return templates.TemplateResponse("user.html", {"request": request, "current_user": current_user})
+        elif current_user["tipo"] == "Evaluadores":
+            return templates.TemplateResponse("user_dos.html", {"request": request, "current_user": current_user})
+        else:
+            raise HTTPException(status_code=401, detail="Unauthorized")
         
-        return templates.TemplateResponse("user.html", {"request": request, "current_user": current_user})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")

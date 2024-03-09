@@ -1,0 +1,51 @@
+{% block lista_partidos_asignados_dos %}
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>Partido_id</th>
+            <th>arbitro_1_id</th>
+            <th>arbitro_2_id</th>
+            <th>arbitro_3_id</th>
+            <th>arbitro_4_id</th>
+            <th>evaluacion_id</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for partido in partidos %}
+        <tr>
+            <td>{{ partido.partido_id }}</td>
+            <td>{{ partido.arbitro_1_id }}</td>
+            <td>{{ partido.arbitro_2_id }}</td>
+            <td>{{ partido.arbitro_3_id }}</td>
+            <td>{{ partido.arbitro_4_id }}</td>
+            <td>{{ partido.evaluacion_id }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

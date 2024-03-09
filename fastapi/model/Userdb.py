@@ -149,7 +149,7 @@ class Campeonato(Base):
     partidos = relationship("Partido", back_populates="campeonato")
 
     def __init__(self, nombre):
-        self.nombre = nombre
+        self.nombre = "nombre"
 
     def __repr__(self):
         return f"Campeonato(ID={self.ID}, nombre={self.nombre})"

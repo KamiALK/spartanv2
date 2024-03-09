@@ -1,0 +1,49 @@
+{% block campeonatos %}
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>CAMPEONATOS</th>
+            <!-- <th>arbitro_2_id</th> -->
+            <!-- <th>arbitro_3_id</th> -->
+            <!-- <th>arbitro_4_id</th> -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for campeonato in campeonatos %}
+        <tr>
+            <td>{{ campeonato.ID }}</td>
+            <td>{{ campeonato.nombre }}</td>
+            <!-- <td>{{ campeonato.arbitro_2_id }}</td> -->
+            <!-- <td>{{ campeonato.arbitro_3_id }}</td> -->
+            <!-- <td>{{ campeonato.arbitro_4_id }}</td> -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

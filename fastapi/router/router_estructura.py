@@ -33,6 +33,32 @@ templates = Jinja2Templates(directory="templates")
 
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Partidos    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+@router.get("/evaluadores/partidos")
+async def get_all_partidos( request: Request,
+                            db: Session = Depends(get_db),
+                            current_user: dict = Depends(functio.get_current_user)):
+    try:
+        if current_user["tipo"] == "admin":
+            return templates.TemplateResponse("admin.html", {"request": request, "current_user": current_user})
+        elif current_user["tipo"] == "Arbitros":
+            return templates.TemplateResponse("no_autorizados.html", {"request": request, "current_user": current_user})
+        elif current_user["tipo"] == "Evaluadores":
+            partidos = function.get_all_partidos(db=db)
+            return templates.TemplateResponse("user_dos_partidos.html", {"request": request, "partidos":partidos})
+        else:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        
+        return templates.TemplateResponse("user.html", {"request": request, "current_user": current_user})
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    partidos = function.get_all_partidos(db=db)
+    return partidos
+
+1
+
+
+
 @router.post("/get_partidos_nombre")
 async def buscar_partido_by_nombre_equipo(equipo: str, partido: PartidoBase, db: Session = Depends(get_db)):
     if equipo and partido:
@@ -79,37 +105,21 @@ async def asignacion_arbitro_partido(partido_evaluador_data: partido_arbitro_sch
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     return updated_partido
-@router.get("/obtener_asignaciones/me")
+# @router.get("/obtener_asignaciones/me")
+
+
+@router.get("/obtener_asignaciones/")
 async def obtener_partidos_asignados(
     request: Request,
     db=Depends(get_db),
-    token: str = Cookie(None) 
-):
-    if token is None:
-        raise HTTPException(status_code=401, detail="Token not found in cookie")
-    try:
-        #obtiene el usuario
-        id1= functio.get_current_user( token=token)
-        print(id1)
-        # Alamcena el id del usuario
-        number_id = int(id1["ID"])
-        
-        print(number_id)#obtengo los partidos asignados
-        partidos= function.get_partidos_asignados(db=db, id_user=number_id)
-        print(partidos)
-        return templates.TemplateResponse("user_asignaciones.html", {"request": request, "partidos": partidos})
-    except:
-
-        partidos= "no hay partidos"
-        return templates.TemplateResponse("user_asignaciones.html", {"request": request, "partidos": partidos})
-
-@router.get("/obtener_asignaciones")
-async def obtener_partidos_asignados(
-    request: Request,
-    db=Depends(get_db),
+    current_user:dict= Depends(functio.get_current_user),
+    
     
 )-> List[Dict[str, Any]]:    
-    partidos: List[partido_arbitro_scheme]= function.buscar_all_asignaciones(db=db)
+    
+    if not current_user["tipo"] == "Arbitros":
+        return templates.TemplateResponse("no_autorizado.html", {"request": request})
+    partidos: List[partido_arbitro_scheme]= function.buscar_partidos_asignados(db=db,arbitro_id=current_user["ID"])
     data = []
     for partido in partidos:
         partido_dict = {
@@ -124,6 +134,32 @@ async def obtener_partidos_asignados(
  
     return templates.TemplateResponse("user_asignaciones.html", {"request": request, "partidos": data})
 
+@router.get("/evaluadores/asignaciones")
+async def obtener_all_asignaciones(
+    request: Request,
+    db=Depends(get_db),
+    current_user:dict= Depends(functio.get_current_user),
+    
+    
+)-> List[Dict[str, Any]]:    
+    
+    if not current_user["tipo"] == "Evaluadores":
+        return templates.TemplateResponse("no_autorizado.html", {"request": request})
+    partidos: List[partido_arbitro_scheme]= function.buscar_all_asignaciones(db=db)
+    data = []
+    for partido in partidos:
+        partido_dict = {
+            "partido_id": partido.partido_id,
+            "arbitro_1_id": partido.arbitro_1_id,
+            "arbitro_2_id": partido.arbitro_2_id,
+            "arbitro_3_id": partido.arbitro_3_id,
+            "arbitro_4_id": partido.arbitro_4_id,
+            "evaluacion_id": partido.evaluacion_id,
+        }
+        data.append(partido_dict)
+    
+ 
+    return templates.TemplateResponse("user_dos_asignaciones.html", {"request": request, "partidos": data})
 
 
 @router.get("/Obtener_partidos_evaluados")
@@ -220,6 +256,20 @@ async def create_campeonato(campeonato:CampeonatoSchema , db=Depends(get_db)):
     
     return created_campeonato
 
+@router.get("/evaluadores/campeonatos")
+async def get_campeonatos(request: Request,
+    db=Depends(get_db),
+    current_user= Depends(functio.get_current_user)):
+    if current_user["tipo"] == "Evaluadores":
+        campeonatos:dict=function.get_campeonatos_all(db=db)
+        # return campeonatos
+        print (campeonatos)
+        return templates.TemplateResponse(
+            "user_dos_campeonatos.html", {"request": request,
+            "campeonatos": campeonatos})
+    else:
+        return {"message":"error "}
+
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    evaluacion Arbitro   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @router.post("/partidos/evaluacion")
 async def create_evaluacion_arbitro(evaluacion_data: EvaluacionesBase, db: Session = Depends(get_db)):
@@ -248,7 +298,7 @@ async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
 
     
-@router.get("/mostrar_evaluacion")
+@router.get("/mostrar_evaluacion_pinchada")
 async def mostrar_evaluacion(id: int, db=Depends(get_db)):
     return function.buscar_evaluacion_id(db=db, id=id)
     
@@ -266,68 +316,14 @@ async def grafica(
         id1= functio.get_current_user( token=token)
         # Alamcena el id del usuario
         number_id = int(id1["ID"])
-        #obtengo la evaluacion
-        evaluaciones:Evaluaciones = function.buscar_evaluacion_id(db=db, id=number_id)
+        #obtengo la evaluacion importante convertirlo en diccionario 
+        evaluaciones: dict = function.buscar_evaluacion_id(db=db, id=number_id)
         
-        # Renderizar la plantilla con los datos
-        data = {
-            "estadofisico": evaluaciones.estado_fisico,
-            "desplazamiento": evaluaciones.desplazamiento,
-            "lectura_de_juego": evaluaciones.lectura_de_juego,
-            "control_de_juego": evaluaciones.control_de_juego,
-            "nivelDificultadTorneo":evaluaciones.nivelDificultadTorneo,
-            "DificultadEtapaTorneo":evaluaciones.DificultadEtapaTorneo,
-            "temperaturaEquipos": evaluaciones.temperaturaEquipos,
-            
-            "situacionesRealesA": evaluaciones.situacionesRealesA,
-            "faltasNaturalezaA": evaluaciones.faltasNaturalezaA,
-            "faltasTacticasA": evaluaciones.faltasTacticasA,
-            
-            "situacionesRealesI": evaluaciones.situacionesRealesI,
-            "faltasNaturalezaI": evaluaciones.faltasNaturalezaI,
-            "faltasTacticasI": evaluaciones.faltasTacticasI,
-            
-            
-            "observacionesCDJ": evaluaciones.observacionesCDJ,
-            "observacionesEF": evaluaciones.observacionesEF,
-            "observacionesD": evaluaciones.observacionesD,
-            "observacionesL": evaluaciones.observacionesL
-            
-       
-
-            
-            
-        }
-        
-        return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
+        return templates.TemplateResponse("user_grafica.html", {"request": request, "data": evaluaciones})
     except:
-        data = {
-            "estadofisico": None,
-            "desplazamiento": None,
-            "lectura_de_juego": None,
-            "control_de_juego": None,
-            "nivelDificultadTorneo": None,
-            "temperaturaEquipos": None,
-            
-            "situacionesRealesA": None,
-            "faltasNaturalezaA": None,
-            "faltasTacticasA": None,
-            
-            "situacionesRealesI": None,
-            "faltasNaturalezaI": None,
-            "faltasTacticasI": None,
-            
-            "observacionesCDJ": None,
-            "observacionesEF": None,
-            "observacionesD": None,
-            "observacionesL": None
-            
-            
-            
-            
-            
-        }
-    return templates.TemplateResponse("user_grafica.html", {"request": request, "data": data})
+        
+        return templates.TemplateResponse("user_grafica.html", {"request": request, "data": evaluaciones})
+    
 
         
 

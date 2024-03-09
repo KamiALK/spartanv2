@@ -1,7 +1,7 @@
 from sqlalchemy.orm import session
 from schema.user_schema import UserID, TokenData,Token,Usernopass,UserData
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from fastapi import Depends,  HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -131,9 +131,7 @@ def get_user1(db, username: str):
 def authenticate_user( db,username: str, password: str,tipo:str)->UserID:
     # user = get_user(fake_db, username)
     user:UserID = get_user_by_email(db=db,username=username, tipo = tipo)
-    print("Username:", username)
-    print("Password:", password)
-    print("Tipo:", tipo)
+
     if not user:
         return False
     if not verify_password(password, user.passwd):
@@ -144,9 +142,13 @@ def authenticate_user( db,username: str, password: str,tipo:str)->UserID:
 def create_access_token(db,data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        # expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        # expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc)+ timedelta(minutes=15) 
+        
+        
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -172,6 +174,7 @@ def login_for_access_token(
             "apellido": user.apellido,
             "email":user.email,
             "username":user.username,
+            "tipo":tipo,
                   
                   }, expires_delta=access_token_expires
     )
@@ -205,6 +208,7 @@ def get_current_user(token: Optional[str] = Cookie(None)):
             "apellido": payload.get("apellido"),
             "email": payload.get("email"),
             "username": payload.get("username"),
+            "tipo": payload.get("tipo"),
             
         }
         return user_info

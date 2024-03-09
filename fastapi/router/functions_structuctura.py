@@ -13,6 +13,12 @@ from sqlalchemy import or_
 from sqlalchemy import desc
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Partidos    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def get_all_partidos(db: Session):
+    partidos = db.query(Partido).all()
+    
+    return partidos
+
+
 
 def get_partido_by_equipo(db: Session, equipo_nombre: str, partido: PartidoBase):
     # Buscar el ID del equipo local usando el nombre del equipo proporcionado
@@ -136,6 +142,9 @@ def create_campeonato(db: Session, campeonato: CampeonatoSchema):
     db.commit()
     db.refresh(db_campeonato)
     return db_campeonato
+def get_campeonatos_all(db: Session):
+    Campeonatos_encontrados = db.query(Campeonato).all()
+    return Campeonatos_encontrados
 
 
 
@@ -289,7 +298,9 @@ def buscar_partidos_asignados(db: Session,  arbitro_id: int):
     else:
         # Manejo de error si el tipo de usuario no existe
         return []
-def buscar_all_asignaciones(db: Session)->partido_arbitro_scheme:
+def buscar_all_asignaciones(db: Session)->arbitro_asignacion_scheme:
     return db.query(Arbitro_asignacion_Partido).all()
+    
+    
     
             

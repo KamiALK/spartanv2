@@ -1,0 +1,48 @@
+
+ 
+
+{% block content %}
+{% include "components/vertical.html" %}
+<div class="col-12 col-sm-12 col-md-12 col-lg-18 col-xl-18" style="font-size: 14px;">
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <title>Equipos create</title>
+      <link rel="stylesheet" href="{{ url_for('static', path='estilos.css') }}">
+      <!-- <script src="https://kit.fontawesome.com/b99e675b6e.js"></script> -->
+  </head>
+  <body>
+      <!-- Contenido del cuerpo del documento -->
+      <div class="row m-md-5 m-3">
+        <h1 class="col">Crear Equipo</h1>
+      </div>
+      
+      
+      <form method="post" action="/equipo/create/" class="row g-3 mx-sm-5 mx-2">
+      <!-- <form method="post" class="row g-3 mx-sm-5 mx-2"> -->
+  
+      <!-- tenemos la entrada del nombre   name="firstname"   -->
+        <div class="col-md-4">
+          <label for="validationDefault01" class="form-label"> nombre </label>
+          <input name="nombre" type="text" class="form-control" id="validationDefault01" required />
+        </div>
+        
+  
+      
+      <!-- aqui tenemos al boton submit      -->
+        <div class="col-12">
+          <button class="btn btn-primary" type="submit" >aceptar</button>
+        </div>
+      </form>
+    
+    
+  
+  
+  </body>
+  </html>
+
+</div>
+
+
+{% endblock %}

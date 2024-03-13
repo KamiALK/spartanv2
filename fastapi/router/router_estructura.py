@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 from idna import IDNAError
 from model.Userdb import Evaluaciones
 from schema.estructura_schema import EquipoSchema, EvaluacionesBase,PartidoBase,CampeonatoSchema, partido_arbitro_scheme,arbitro_asignacion_scheme
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Path, status
 from  sqlalchemy.orm import Session
 from model.Get_DB import get_db
 import router.functions_structuctura as function
@@ -58,7 +58,7 @@ async def get_all_partidos( request: Request,
     partidos = function.get_all_partidos(db=db)
     return partidos
 
-1
+
 
 
 
@@ -87,14 +87,14 @@ async def buscar_partidos_by_id_campeonato(id_campeonato: int,  db: Session = De
 
 
 
-@router.post("/partidos/create")
-async def create_partido(partido: PartidoBase, db=Depends(get_db)):
-    created_partido = function.create_partido(db=db, partido=partido)
+# @router.post("/partidos/create")
+# async def create_partido(partido: PartidoBase, db=Depends(get_db)):
+#     created_partido = function.create_partido(db=db, partido=partido)
     
-    # if created_partido is None:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
+#     # if created_partido is None:
+#     #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
     
-    return created_partido
+#     return created_partido
 
 
 #el arbitro tiene que registrar su partido e informar el partido 
@@ -239,22 +239,22 @@ async def partidos_asignados(
 async def get_equipos(db=Depends(get_db)):
     return  function.get_equipos_all(db=db)
 
-@router.post("/equipo/amistoso")
-async def create_equipo(equipo: EquipoSchema, db=Depends(get_db)):
-    created_equipo = function.create_equipo(db=db, equipo=equipo)
+# @router.post("/equipo/amistoso")
+# async def create_equipo(equipo: EquipoSchema, db=Depends(get_db)):
+#     created_equipo = function.create_equipo(db=db, equipo=equipo)
     
-    if created_equipo is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
+#     if created_equipo is None:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
     
-    return created_equipo
+#     return created_equipo
 
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     Campeonato     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@router.post("/campeonato/amistoso")
-async def create_campeonato(campeonato:CampeonatoSchema , db=Depends(get_db)):
-    created_campeonato = function.create_campeonato(db=db, campeonato=campeonato)
+# @router.post("/campeonato/amistoso")
+# async def create_campeonato(campeonato:CampeonatoSchema , db=Depends(get_db)):
+#     created_campeonato = function.create_campeonato(db=db, campeonato=campeonato)
     
-    if created_campeonato is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
+#     if created_campeonato is None:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
     
     
     return created_campeonato
@@ -366,13 +366,81 @@ async def mostrar_evaluacion(
     return templates.TemplateResponse("user_grafica.html", {"request": request, "data": evaluaciones,"current_user":current_user})
 
 
+#!~~~~~~~~~~~~~~~~~~~~~~~~~~~    formularios   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+@router.post("/campeonato/create/",response_model=CampeonatoSchema)
+async def create_campeonato(
+    request: Request,
+    db=Depends(get_db),
+    current_user: dict = Depends(functio.get_current_user),
+    nombre: str = Form(...),
+    )->dict:
+    if not current_user["tipo"] == "Evaluadores":
+        raise templates.TemplateResponse("no_autorizado.html", {"request": request})
+    user_data=CampeonatoSchema(nombre=nombre,ID=None)
+    created_campeonato = function.create_campeonato(db=db, campeonato=user_data)
     
+    if created_campeonato is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
+    
+    
+    return templates.TemplateResponse("campeonato_create.html", {"request": request})
 
 
+@router.get("/campeonato/create/")
+async def create_campeonato_get(
+    request: Request,
+    current_user: dict = Depends(functio.get_current_user),
+    ):
+    if not current_user["tipo"] == "Evaluadores":
+        #en excepcion de no autorizado no se puede cargar corredctamente  porque  no es una excepcion
+                return HTMLResponse(content=open("templates/no_autorizado.html").read(), status_code=403)
 
-        
+    return templates.TemplateResponse("campeonato_create.html", {"request": request})
 
+@router.post("/equipo/create/",response_model=EquipoSchema)
+async def create_equipo(
+    request: Request,   
+    nombre: str = Form(...),
+    db=Depends(get_db),
+    current_user: dict = Depends(functio.get_current_user)
+    )->dict:
+    if not current_user["tipo"] == "Evaluadores":
+        return HTMLResponse(content=open("templates/no_autorizado.html").read(), status_code=403)
+    
+    equipo=EquipoSchema(ID=None,nombre=nombre)
+    created_equipo = function.create_equipo(db=db, equipo=equipo)
+    
+    if created_equipo is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
+    
+    return created_equipo
 
+@router.get("/equipo/create/")
+async def create_equipo_get(
+    request: Request,
+    current_user: dict = Depends(functio.get_current_user),
+    ):
+    if not current_user["tipo"] == "Evaluadores":
+        #en excepcion de no autorizado no se puede cargar corredctamente  porque  no es una excepcion
+                return HTMLResponse(content=open("templates/no_autorizado.html").read(), status_code=403)
 
+    return templates.TemplateResponse("equipos.html", {"request": request})
 
-
+# @router.post("/partidos/create")
+# async def create_partido(
+#     request: Request,
+#     current_user: dict = Depends(functio.get_current_user),
+#     nombre: str = Form(...),
+#     db=Depends(get_db)
+#     )->dict:
+#     if not current_user["tipo"] == "Evaluadore  s":
+#         return HTMLResponse(content=open("templates/no_autorizado.html").read(), status_code=403)
+    
+    
+    
+#     created_partido = function.create_partido(db=db, partido=partido)
+    
+#     # if created_partido is None:
+#     #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partido ya existe")
+    
+#     return created_partido

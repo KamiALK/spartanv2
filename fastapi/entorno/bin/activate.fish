@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/home/kamilo/programming/spartanv2/fastapi/entorno"
+set -gx VIRTUAL_ENV "/home/kamilo/programmig/spartanv2/fastapi/entorno"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

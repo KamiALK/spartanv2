@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/kamilo/programming/spartanv2/fastapi/entorno"
+VIRTUAL_ENV="/home/kamilo/programmig/spartanv2/fastapi/entorno"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

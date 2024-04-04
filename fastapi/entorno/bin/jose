@@ -1,4 +1,4 @@
-#!/home/kamilo/programming/spartanv2/fastapi/entorno/bin/python3
+#!/home/kamilo/programmig/spartanv2/fastapi/entorno/bin/python3
 # EASY-INSTALL-ENTRY-SCRIPT: 'jose==1.0.0','console_scripts','jose'
 import re
 import sys

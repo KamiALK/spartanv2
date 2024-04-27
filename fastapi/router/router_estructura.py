@@ -1,12 +1,9 @@
 
 
-import re
 from typing import Any, Dict, List
-
-from idna import IDNAError
 from model.Userdb import Evaluaciones
 from schema.estructura_schema import EquipoSchema, EvaluacionesBase,PartidoBase,CampeonatoSchema, partido_arbitro_scheme,arbitro_asignacion_scheme
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from  sqlalchemy.orm import Session
 from model.Get_DB import get_db
 import router.functions_structuctura as function
@@ -296,79 +293,37 @@ async def create_evaluacion_arbitro(evaluacion_data: EvaluacionesBase, db: Sessi
 
 #!~~~~~~~~~~~~~~~~~~~~~~    enviar evaluacion api   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+@router.get("/enviar_evaluacion_api")
+async def enviar_evaluacion_api(id: int, db=Depends(get_db)):
+    return function.buscar_evaluacion_id(db=db, id=id)
 
+    
+@router.get("/mostrar_evaluacion_pinchada")
+async def mostrar_evaluacion(id: int, db=Depends(get_db)):
+    return function.buscar_evaluacion_id(db=db, id=id)
+    
 
-
-
-@router.get("/evaluadores/evaluaciones")
-async def obtener_all_evaluaciones(
+@router.get("/users/me/evaluaciones/grafica/")
+async def grafica(
     request: Request,
     db=Depends(get_db),
-    current_user: dict = Depends(functio.get_current_user),
-    
-) -> List[dict]:  # Modificado el tipo de retorno
-    
-    if not current_user["tipo"] == "Evaluadores":
-        print(current_user["tipo"])
-        return templates.TemplateResponse("no_autorizado.html", {"request": request})
-    
-    evaluaciones: List[Evaluaciones] = function.buscar_all_evaluaciones(db=db, id=current_user["ID"])  # Ajuste aquí
-    
-    return templates.TemplateResponse("user_dos_evaluaciones.html", {"request": request, "evaluaciones": evaluaciones})
-
-
-@router.get("/evaluadores/evaluaciones/{id:int}/")
-async def mostrar_evaluacion(
-    request: Request,
-    id: int= Path(...), 
-    db=Depends(get_db),
-    current_user: dict = Depends(functio.get_current_user),
- ):
-    if not current_user["tipo"] == "Evaluadores" :
-        raise templates.TemplateResponse("no_autorizado.html", {"request": request})
-    evaluaciones: dict = function.buscar_evaluacion_id_evaluacion(db=db, id=id)
-    if current_user["ID"] != evaluaciones.evaluador_id:
-        raise templates.TemplateResponse("no_autorizado.html", {"request": request})
-   
-    return templates.TemplateResponse("user_grafica_id.html", {"request": request, "data": evaluaciones,"current_user":current_user})
-
-
-@router.get("/users/me/evaluaciones/")
-async def obtener_all_evaluaciones(
-    request: Request,
-    db=Depends(get_db),
-    current_user: dict = Depends(functio.get_current_user),
-    
-) -> List[dict]:  # Modificado el tipo de retorno
-    
-    if not current_user["tipo"] == "Arbitros":
-        print(current_user["tipo"])
-        return templates.TemplateResponse("no_autorizado.html", {"request": request})
-        
-    evaluaciones: List[Evaluaciones] = function.buscar_all_evaluaciones_arbitro(db=db, id=current_user["ID"])  # Ajuste aquí
-    
-    return templates.TemplateResponse("user_evaluaciones.html", {"request": request, "evaluaciones": evaluaciones})
-    
-@router.get("/users/me/evaluaciones/{id:int}/")
-async def mostrar_evaluacion(
-    request: Request,
-    id: int= Path(...), 
-    db=Depends(get_db),
-    current_user: dict = Depends(functio.get_current_user),
+    token: str = Cookie(None) # Obtén el token de la cookie
 ):
-    if not current_user["tipo"] == "Arbitros":
-        raise templates.TemplateResponse("no_autorizado.html", {"request": request})
-  
-   
-    evaluaciones: dict = function.buscar_evaluacion_id_evaluacion(db=db, id=id)
-    if current_user["ID"] != evaluaciones.arbitro_id:
-        raise templates.TemplateResponse("no_autorizado.html", {"request": request})
-    return templates.TemplateResponse("user_grafica.html", {"request": request, "data": evaluaciones,"current_user":current_user})
-
-
+    if token is None:
+        raise HTTPException(status_code=401, detail="Token not found in cookie")
+    try:
+        #obtiene el usuario
+        id1= functio.get_current_user( token=token)
+        # Alamcena el id del usuario
+        number_id = int(id1["ID"])
+        #obtengo la evaluacion importante convertirlo en diccionario 
+        evaluaciones: dict = function.buscar_evaluacion_id(db=db, id=number_id)
+        
+        return templates.TemplateResponse("user_grafica.html", {"request": request, "data": evaluaciones})
+    except:
+        
+        return templates.TemplateResponse("user_grafica.html", {"request": request, "data": evaluaciones})
     
-
-
 
         
 

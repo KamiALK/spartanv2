@@ -217,4 +217,4 @@ async def read_users_me(
             raise HTTPException(status_code=401, detail="Unauthorized")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error", e=e)

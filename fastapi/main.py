@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query, Request, Form, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+
+# from sqlalchemy.orm import Session
 import router.crud
 from fastapi.responses import HTMLResponse
 from db.conection import Session
@@ -78,7 +79,7 @@ async def get_users_all(request: Request, tipo: str = Path(...), db=Depends(get_
 
 
 @appi.get("/{tipo}/{id:int}", response_class=HTMLResponse)  # Cambia ID a id
-async def get_user(
+async def get_user_id(
     request: Request, id, db=Depends(get_db), tipo: str = Path(...)
 ):  # Cambia ID a id
     usuarios = router.crud.get_user_by_id(db=db, tipo=tipo, ID=id)  # Cambia ID a id
@@ -94,7 +95,7 @@ async def get_user(
 
 
 @appi.get("/{tipo}/cedula/{cedula:int}", response_class=HTMLResponse)  # Cambia ID a id
-async def get_user(
+async def get_user_cc(
     request: Request, cedula, db=Depends(get_db), tipo: str = Path(...)
 ):  # Cambia a cedula
     usuarios = router.crud.get_user_by_cedula(

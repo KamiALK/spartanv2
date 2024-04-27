@@ -1,18 +1,13 @@
-from sqlalchemy.orm import session
-from schema.user_schema import UserID, TokenData,Token,Usernopass,UserData
+from schema.user_schema import UserID, Usernopass, UserData
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from fastapi import Depends,  HTTPException, Query, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from typing import Optional
 from fastapi import Cookie
-from model.Userdb import Arbitros, tipo_clase_mapping 
-
-
-
+from model.Userdb import Arbitros, tipo_clase_mapping
 
 
 SECRET_KEY = "a2e2da9015817e03d78da769dca6b13bad1196ca632f2584a9fb13473ac0d35a"
@@ -30,8 +25,10 @@ def get_users(db, tipo: str):
         # Manejo de error si el tipo de usuario no existe
         return []
 
-def get_arbitros(db,)->Arbitros:
-    
+
+def get_arbitros(
+    db,
+) -> Arbitros:
     try:
         return db.query(Arbitros).all()
     except:
@@ -39,12 +36,14 @@ def get_arbitros(db,)->Arbitros:
         return []
 
 
-def get_user_by_email(db, username: str, tipo: str)->UserID:
+def get_user_by_email(db, username: str, tipo: str) -> UserID:
     clase_usuario = tipo_clase_mapping.get(tipo)
     print(clase_usuario)
     # user:UserID = db.query(clase_usuario).filter(email == username).first()
-    user :UserID= db.query(clase_usuario).filter_by(email=username).first()
+    user: UserID = db.query(clase_usuario).filter_by(email=username).first()
     return user
+
+
 def get_user_by_id(db, ID: int, tipo: str):  # Cambia ID a id
     clase_usuario = tipo_clase_mapping.get(tipo)
     # Utiliza filter para buscar usuarios por ID
@@ -56,15 +55,13 @@ def get_user_by_id(db, ID: int, tipo: str):  # Cambia ID a id
         # Manejo de error si el tipo de usuario no existe
         return None
 
-    
-
 
 # def get_user_by_cedula(db, cedula: int):
 #     user = db.query(Userdb).filter(Userdb.cedula == cedula).first()
 def get_user_by_cedula(db, cedula: int, tipo: str):  #
     clase_usuario = tipo_clase_mapping.get(tipo)
     # Utiliza filter para buscar usuarios por ID
-    user = db.query(clase_usuario).filter_by(cedula=cedula).first() 
+    user = db.query(clase_usuario).filter_by(cedula=cedula).first()
     if user:
         # print(f"El tipo de usuario es: {clase_usuario}")
         return user
@@ -72,7 +69,8 @@ def get_user_by_cedula(db, cedula: int, tipo: str):  #
         # Manejo de error si el tipo de usuario no existe
         return None
 
-def create_new_user(db, user: UserID, tipo:str):
+
+def create_new_user(db, user: UserID, tipo: str):
     clase_usuario = tipo_clase_mapping.get(tipo)
     # Hash the password before storing it in the database
     user.passwd = pwd_context.hash(user.passwd)
@@ -80,15 +78,26 @@ def create_new_user(db, user: UserID, tipo:str):
     existing_user = get_user_by_cedula(db=db, cedula=user.cedula, tipo=tipo)
     if existing_user:
         return None  # User already exists
-    id=None
-    new_user =clase_usuario(ID=id,username=user.username, nombre=user.nombre, apellido=user.apellido, celular=user.celular,
-                      edad=user.edad, cedula=user.cedula, genero=user.genero, email=user.email, passwd=user.passwd)
-    
+    id = None
+    new_user = clase_usuario(
+        ID=id,
+        username=user.username,
+        nombre=user.nombre,
+        apellido=user.apellido,
+        celular=user.celular,
+        edad=user.edad,
+        cedula=user.cedula,
+        genero=user.genero,
+        email=user.email,
+        passwd=user.passwd,
+    )
+
     db.add(new_user)
     db.commit()
     db.flush(new_user)
-    
+
     return new_user
+
 
 # def create_user(db, user: UserID):
 #     # Hash the password before storing it in the database
@@ -101,18 +110,16 @@ def create_new_user(db, user: UserID, tipo:str):
 #     id=None
 #     new_user =Userdb(ID=id,username=user.username, nombre=user.nombre, apellido=user.apellido, celular=user.celular,
 #                       edad=user.edad, cedula=user.cedula, genero=user.genero, email=user.email, passwd=user.passwd)
-    
+
 #     db.add(new_user)
 #     db.commit()
 #     db.flush(new_user)
-    
+
 #     return new_user
 
 
-
-
-
 #!   /////////////////////////////////////////////////////////////
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -128,9 +135,9 @@ def get_user1(db, username: str):
         return Usernopass(**user_dict)
 
 
-def authenticate_user( db,username: str, password: str,tipo:str)->UserID:
+def authenticate_user(db, username: str, password: str, tipo: str) -> UserID:
     # user = get_user(fake_db, username)
-    user:UserID = get_user_by_email(db=db,username=username, tipo = tipo)
+    user: UserID = get_user_by_email(db=db, username=username, tipo=tipo)
 
     if not user:
         return False
@@ -139,26 +146,26 @@ def authenticate_user( db,username: str, password: str,tipo:str)->UserID:
     return user
 
 
-def create_access_token(db,data: dict, expires_delta: timedelta | None = None):
+def create_access_token(db, data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         # expire = datetime.utcnow() + expires_delta
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         # expire = datetime.utcnow() + timedelta(minutes=15)
-        expire = datetime.now(timezone.utc)+ timedelta(minutes=15) 
-        
-        
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
 def login_for_access_token(
-    db, 
-    tipo:str,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()])->UserData:
-    user:UserData = authenticate_user(db, form_data.username, form_data.password,tipo=tipo)
+    db, tipo: str, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> UserData:
+    user: UserData = authenticate_user(
+        db, form_data.username, form_data.password, tipo=tipo
+    )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -167,25 +174,23 @@ def login_for_access_token(
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        db, data={
+        db,
+        data={
             "sub": user.username,
             "id": user.ID,
             "nombre": user.nombre,
             "apellido": user.apellido,
-            "email":user.email,
-            "username":user.username,
-            "tipo":tipo,
-                  
-                  }, expires_delta=access_token_expires
+            "email": user.email,
+            "username": user.username,
+            "tipo": tipo,
+        },
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-
-
 def get_current_user(token: Optional[str] = Cookie(None)):
     credentials_exception = HTTPException(
-        
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
@@ -194,27 +199,23 @@ def get_current_user(token: Optional[str] = Cookie(None)):
     try:
         if token is None:
             raise credentials_exception
-        
+
         # Aquí decodificas el token de la cookie y obtienes la información del usuario
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        
+
         user_info = {
-            "username": username,
+            # "username": username,
             "ID": payload.get("id"),
             "nombre": payload.get("nombre"),
             "apellido": payload.get("apellido"),
             "email": payload.get("email"),
             "username": payload.get("username"),
             "tipo": payload.get("tipo"),
-            
         }
         return user_info
-    
+
     except JWTError:
         raise credentials_exception
-
-
-

@@ -131,6 +131,7 @@ def get_equipo_by_id_equipo(db, id_partido: int):
 
 
 def create_equipo(db: Session, equipo: EquipoSchema):
+<<<<<<< HEAD
     db_equipo = Equipo(nombre=equipo.nombre)
 
     # Verificar si lider_id no es None antes de intentar iterar sobre él
@@ -141,11 +142,22 @@ def create_equipo(db: Session, equipo: EquipoSchema):
             if jugador:
                 db_equipo.lider_id = lider_id
 
+=======
+    db_equipo = Equipo(
+        nombre=equipo.nombre
+        
+    )
+    # Asociar jugadores existentes al equipo
+    for lider_id in equipo.lider_id:
+        jugador = db.query(Jugadores).filter(Jugadores.ID == lider_id).first() # type: ignore
+        print(jugador)
+        if jugador:
+            db_equipo.lider_id = lider_id
+>>>>>>> parent of 74e3adac (quedaron todos los get)
     db.add(db_equipo)
     db.commit()
     db.refresh(db_equipo)
     return db_equipo
-
 
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Campeonato    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

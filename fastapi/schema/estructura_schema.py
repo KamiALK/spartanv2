@@ -112,7 +112,7 @@ class Jugadores(JugadoresBase):
 
 
 class CampeonatoSchema(BaseModel):
-    ID: Optional[int] = None
+    ID: int
     nombre: str
     equipos: List[EquipoSchema] = []
     partidos: List[PartidoBase] = []

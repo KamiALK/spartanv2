@@ -20,7 +20,7 @@ from schema.estructura_schema import (
     PartidoBase,
     EquipoSchema,
     CampeonatoSchema,
-    CampeonatosScheme,
+    # CampeonatosScheme,
     arbitro_asignacion_scheme,
 )
 #!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Partidos    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

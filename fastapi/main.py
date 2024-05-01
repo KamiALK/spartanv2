@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query, Request, Form, Depends, HTTPException, status
 
-# from sqlalchemy.orm import Session  
+# from sqlalchemy.orm import Session
 import router.crud
 from fastapi.responses import HTMLResponse
 from db.conection import Session
